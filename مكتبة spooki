@@ -262,6 +262,7 @@ local Library do
 
     Library.Theme = TableClone(Themes["Preset"])
 
+
     local ActiveGradients = {}
     local function ApplySpookiBorder(instance, thickness)
         if not instance or instance:FindFirstChild("SpookiStroke") then
@@ -299,6 +300,7 @@ local Library do
             end
         end
     end)
+
 
     local Tween = { } do
         Tween.__index = Tween
@@ -520,7 +522,6 @@ local Library do
             local Dragging = false 
             local DragStart
             local StartPosition 
-            local dragInput
         
             local function GetUIScale()
                 local scaleObj = Gui:FindFirstChildOfClass("UIScale")
@@ -540,11 +541,9 @@ local Library do
                     Dragging = true
                     DragStart = Input.Position
                     StartPosition = Gui.Position
-                    dragInput = Input
                     Input.Changed:Connect(function()
                         if Input.UserInputState == Enum.UserInputState.End then
                             Dragging = false
-                            dragInput = nil
                         end
                     end)
                 end
@@ -790,18 +789,6 @@ local Library do
         ResetOnSpawn = false
     })
 
-    local function shouldBorder(inst)
-        return inst:IsA("TextButton") or inst:IsA("TextBox") or (inst:IsA("Frame") and inst.BackgroundTransparency < 1)
-    end
-
-    Library.Holder.Instance.DescendantAdded:Connect(function(inst)
-        task.defer(function()
-            if inst and inst.Parent and shouldBorder(inst) then
-                ApplySpookiBorder(inst, inst:IsA("TextButton") and 1.5 or 1.3)
-            end
-        end)
-    end)
-
     Library.UnusedHolder = Instances:Create("ScreenGui", {
         Parent = gethui(),
         Name = "\0",
@@ -810,7 +797,22 @@ local Library do
         ResetOnSpawn = false
     })
 
-    Library.NotifHolder  = Instances:Create("Frame", {
+    
+    local function shouldBorder(inst)
+        return inst:IsA("TextButton") or inst:IsA("TextBox") or (inst:IsA("Frame") and inst.BackgroundTransparency < 1)
+    end
+
+    if Library.Holder and Library.Holder.Instance then
+        Library.Holder.Instance.DescendantAdded:Connect(function(inst)
+            task.defer(function()
+                if inst and inst.Parent and shouldBorder(inst) then
+                    ApplySpookiBorder(inst, inst:IsA("TextButton") and 1.5 or 1.3)
+                end
+            end)
+        end)
+    end
+
+Library.NotifHolder  = Instances:Create("Frame", {
         Parent = Library.Holder.Instance,
         Name = "\0",
         BackgroundTransparency = 1,
@@ -1329,7 +1331,7 @@ local Library do
                         BorderColor3 = FromRGB(0, 0, 0),
                         Size = UDim2New(0, 16, 0, 16),
                         AnchorPoint = Vector2New(0.5, 1),
-                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                        Image = "rbxassetid://92464809279921",
                         Name = "nig",
                         BackgroundTransparency = 1,
                         Position = UDim2New(1, -16, 1, -6),
@@ -1606,14 +1608,14 @@ local Library do
                     BorderSizePixel = 0,
                     CanvasSize = UDim2New(0, 0, 0, 0),
                     ScrollBarImageColor3 = FromRGB(124, 163, 255),
-                    MidImage = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    MidImage = "rbxassetid://86870199131153",
                     BorderColor3 = FromRGB(0, 0, 0),
                     ScrollBarThickness = 0,
                     Size = UDim2New(1, -20, 0, 69),
                     Selectable = false,
-                    TopImage = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    TopImage = "rbxassetid://86870199131153",
                     Position = UDim2New(0, 10, 1, -30),
-                    BottomImage = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    BottomImage = "rbxassetid://86870199131153",
                     BackgroundTransparency = 1,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 }) 
@@ -2343,7 +2345,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 21, 0, 20),
                     AnchorPoint = Vector2New(0, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://81598136527047",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 15, 0.5, 0),
                     ZIndex = 2,
@@ -2612,7 +2614,7 @@ local Library do
                     ImageColor3 = FromRGB(255, 255, 255),
                     BorderColor3 = FromRGB(0, 0, 0),
                     AnchorPoint = Vector2New(1, 0),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://" .. (Data.Icon or "87107896404147"),
                     BackgroundTransparency = 1,
                     Position = UDim2New(1, 0, 0, 0),
                     Size = UDim2New(0, 16, 0, 16),
@@ -2740,11 +2742,10 @@ local Library do
                     Name = "\0",
                     Visible = true,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    AnchorPoint = Vector2New(0, 0),
-                    Position = UDim2New(0, 0, 0, 55),
+                    AnchorPoint = Vector2New(1, 0),
                     BackgroundTransparency = 0.15,
-                    Size = UDim2New(0, 180, 1, -55),
-                    ZIndex = 3,
+                    Size = UDim2New(0, 225, 1, 0),
+                    ZIndex = 2,
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(27, 25, 29),
                     Active = true,
@@ -2818,9 +2819,9 @@ local Library do
                     Items["FloatingGlow"] = Instances:Create("Frame", {
                         Parent = Library.Holder.Instance,
                         Name = "\0",
-                        AnchorPoint = Vector2New(0, 0),
-                        Position = UDim2New(0.02, 0, 0.28, 0),
-                        Size = UDim2New(0, 56, 0, 56),
+                        AnchorPoint = Vector2New(0.5, 0),
+                        Position = UDim2New(0.5, 0, 0, 14),
+                        Size = IsMobile and UDim2New(0, 56, 0, 56) or UDim2New(0, 70, 0, 70),
                         BackgroundTransparency = 0,
                         BackgroundColor3 = Library.Theme.Accent,
                         BorderSizePixel = 0,
@@ -2868,7 +2869,7 @@ local Library do
                         Parent = Items["FloatingButton"].Instance,
                         BorderColor3 = FromRGB(0, 0, 0),
                         Name = "\0",
-                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                        Image = "rbxassetid://73756298533665",
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
                         Position = UDim2New(0.5, 0, 0.5, 0),
@@ -2883,7 +2884,6 @@ local Library do
                     local FBRoot = Items["FloatingGlow"].Instance
                     local FBDragging = false
                     local FBStartPos
-                    local FBDragInput = nil
 
                     local function GetFBScale()
                         local holder = Library.Holder and Library.Holder.Instance
@@ -2901,11 +2901,9 @@ local Library do
                             FBDragStart = Input.Position
                             FBStartPos = FBRoot.Position
                             FBClickTimer = tick()
-                            FBDragInput = Input
                             Input.Changed:Connect(function()
                                 if Input.UserInputState == Enum.UserInputState.End then
                                     FBDragging = false
-                                    FBDragInput = nil
                                 end
                             end)
                         end
@@ -2971,7 +2969,7 @@ local Library do
                     ScaleType = Enum.ScaleType.Fit,
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 35, 0, 35),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://"..Window.Logo,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 12, 0, 12),
                     ZIndex = 2,
@@ -3006,7 +3004,6 @@ local Library do
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })  Items["Title"]:AddToTheme({TextColor3 = "Text"})
 
-                -- "by slender" beside the title: 50% transparent, ~40% smaller
                 Items["Credit"] = Instances:Create("TextLabel", {
                     Parent = Items["Title"].Instance,
                     Name = "\0",
@@ -3048,8 +3045,8 @@ local Library do
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
                     BackgroundTransparency = 0.75,
-                    Position = UDim2New(0, 180, 0, 55),
-                    Size = UDim2New(1, -180, 1, -55),
+                    Position = UDim2New(0, 0, 0, 55),
+                    Size = UDim2New(1, 0, 1, -55),
                     ZIndex = 2,
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(27, 25, 29)
@@ -3087,7 +3084,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 11, 0, 11),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://130510492706892",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     ZIndex = 3,
@@ -3383,7 +3380,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 11, 0, 11),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://79384247470010",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     ZIndex = 3,
@@ -3469,7 +3466,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 15, 0, 14),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://122669828593160",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     ZIndex = 3,
@@ -3595,7 +3592,7 @@ local Library do
                         FontFace = Library.Font,
                         TextColor3 = FromRGB(240, 240, 240),
                         TextTransparency = 0.30000001192092896,
-                        Text = "اغلاق",
+                        Text = "Close",
                         AutomaticSize = Enum.AutomaticSize.X,
                         Size = UDim2New(0, 0, 0, 15),
                         AnchorPoint = Vector2New(0.5, 0.5),
@@ -3703,11 +3700,10 @@ local Library do
                             end
     
                             SettingsItems["Settings"].Instance.Visible = true
-                            SettingsItems["Settings"].Instance.Parent = Items["MainFrame"].Instance
+                            SettingsItems["Settings"].Instance.Parent = Library.Holder.Instance
                             
                             RenderStepped = RunService.RenderStepped:Connect(function()
-                                local icon = Items["SettingsButton"].Instance
-                                SettingsItems["Settings"].Instance.Position = UDim2New(0, icon.Position.X.Offset - 280, 0, icon.Position.Y.Offset + 36)
+                                SettingsItems["Settings"].Instance.Position = UDim2New(0, Items["SettingsIcon"].Instance.AbsolutePosition.X, 0, Items["SettingsIcon"].Instance.AbsolutePosition.Y + Items["SettingsButton"].Instance.AbsoluteSize.Y + 108)
                                 SettingsItems["Settings"].Instance.Size = UDim2New(0, 325, 0, 230)
                             end)
         
@@ -3765,7 +3761,7 @@ local Library do
                             Debounce = false 
                             SettingsItems["Settings"].Instance.Visible = Settings.IsOpen
                             task.wait(0.2)
-                            SettingsItems["Settings"].Instance.Parent = not Settings.IsOpen and Library.UnusedHolder.Instance or Items["MainFrame"].Instance
+                            SettingsItems["Settings"].Instance.Parent = not Settings.IsOpen and Library.UnusedHolder.Instance or Library.Holder.Instance
                         end)
                     end
     
@@ -3783,7 +3779,7 @@ local Library do
                     setmetatable(Settings, Library.Sections)
                 end
 
-                Settings:Label("لون التدرج الاول"):Colorpicker({
+                Settings:Label("First gradient color"):Colorpicker({
                     Flag = "AccentColor",
                     Default = Library.Theme.Accent,
                     Callback = function(Color)
@@ -3792,7 +3788,7 @@ local Library do
                     end
                 })
 
-                Settings:Label("لون التدرج الثاني"):Colorpicker({
+                Settings:Label("Second gradient color"):Colorpicker({
                     Flag = "AccentGradientColor",
                     Default = Library.Theme.AccentGradient,
                     Callback = function(Color)
@@ -3802,7 +3798,7 @@ local Library do
                 })
 
                 Settings:Dropdown({
-                    Name = "سمك الخط",
+                    Name = "Font weight",
                     Flag = "FontStyle",
                     Default = "SemiBold",
                     Items = {"Light", "Regular", "SemiBold", "Indie Flower", "Fredoka One", "Cartoon"},
@@ -3817,7 +3813,7 @@ local Library do
                 })
 
                 Settings:Dropdown({
-                    Name = "مكان الاشعارات",
+                    Name = "Notification Position",
                     Flag = "NotificationPosition",
                     Default = "Right",
                     Items = {"Right", "Left"},
@@ -3833,7 +3829,7 @@ local Library do
                 })
 
                 Settings:Slider({
-                    Name = "شفافية الخلفية",
+                    Name = "Background Transparency",
                     Default = 1,
                     Decimals = 0.01,
                     Max = 1,
@@ -3846,7 +3842,7 @@ local Library do
                 })
 
                 Settings:Slider({
-                    Name = "حجم الواجهة",
+                    Name = "UI Size",
                     Default = IsMobile and 0.56 or 1,
                     Decimals = 0.01,
                     Max = 1.3,
@@ -3860,7 +3856,7 @@ local Library do
                 })
 
                 Settings:Keybind({
-                    Name = "زر فتح القائمة",
+                    Name = "Menu Keybind",
                     Flag = "MenuBind",
                     Default = Enum.KeyCode.RightAlt,
                     Callback = function(Value)
@@ -3869,14 +3865,13 @@ local Library do
                 })
 
                 Settings:Dropdown({
-                    Name = "شكل الثيم",
+                    Name = "Theme Preset",
                     Flag = "SpookiThemePreset",
                     Default = "Spooki",
                     Items = {"Spooki", "Dark", "Darker", "Purple"},
                     Callback = function(Value)
                         local preset = SpookiThemePresets[Value]
                         if not preset then return end
-                        -- Professional full-UI theme apply (buttons, sections, outlines, backgrounds)
                         local mapped = {
                             Accent = preset.Accent,
                             AccentGradient = preset.Gradient,
@@ -3911,14 +3906,10 @@ local Library do
                         if Library.SetFlags["AccentGradientColor"] then
                             Library.SetFlags["AccentGradientColor"](preset.Gradient)
                         end
-                        if Library.ThemeManager and Library.ThemeManager.SetTheme then
-                            -- keep manager state in sync without re-applying
-                            if Library.FlagDefaults then Library.FlagDefaults["SpookiThemePreset"] = Value end
-                        end
                     end
                 })
 
-                local BG_IMAGE_ID  = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420"
+                local BG_IMAGE_ID  = "rbxassetid://87107896404147"
                 local BgImageLabel = nil
                 local BgTintLabel  = nil
 
@@ -3978,8 +3969,8 @@ local Library do
                     BgTintLabel.Name                 = "SpookiBgTint"
                     BgTintLabel.Size                 = UDim2New(1, xExt, 1, 0)
                     BgTintLabel.Position             = UDim2New(0, xOff, 0, 0)
-                    BgTintLabel.BackgroundTransparency = 0.35
-                    BgTintLabel.BackgroundColor3     = FromRGB(0, 8, 20)
+                    BgTintLabel.BackgroundTransparency = 0.5
+                    BgTintLabel.BackgroundColor3     = FromRGB(0, 0, 0)
                     BgTintLabel.ZIndex               = 1
                     BgTintLabel.BorderSizePixel      = 0
 
@@ -3993,10 +3984,31 @@ local Library do
                     ApplyBgImage(true)
                 end)
 
+                Settings:Toggle({
+                    Name = "Background Image",
+                    Flag = "SpookiBgImageEnabled",
+                    Default = true,
+                    Callback = function(Value)
+                        ApplyBgImage(Value)
+                    end
+                })
+
+                Settings:Toggle({
+                    Name = "Full Hub Background",
+                    Flag = "SpookiBgFullHub",
+                    Default = true,
+                    Callback = function(Value)
+                        Window.SpookiBg.FullHub = Value
+                        if Library.Flags["SpookiBgImageEnabled"] then
+                            ApplyBgImage(true)
+                        end
+                    end
+                })
+
                 Window.SpookiApplyBg = ApplyBgImage
 
                 Settings:Button({
-                    Name = "ارجاع الافتراضي",
+                    Name = "Reset to Defaults",
                     Callback = function()
 
                         local preset = SpookiThemePresets.Spooki
@@ -4111,15 +4123,6 @@ local Library do
                 end
 
                 Window.IsOpen = Bool
-                if not Bool then
-                    for _, openFrame in pairs(Library.OpenFrames) do
-                        if openFrame and openFrame.SetOpen then
-                            pcall(function()
-                                openFrame:SetOpen(false)
-                            end)
-                        end
-                    end
-                end
 
                 Debounce = true 
 
@@ -4159,7 +4162,7 @@ local Library do
                         if Bool then
                             Value.BackgroundTransparency = 1
                             NewTween = Tween:Create(Value, TweenInfo.new(Library.FadeSpeed, Library.Tween.Style, Library.Tween.Direction), {
-                                BackgroundTransparency = 0.35
+                                BackgroundTransparency = 0.5
                             }, true)
                         else
                             NewTween = Tween:Create(Value, TweenInfo.new(Library.FadeSpeed, Library.Tween.Style, Library.Tween.Direction), {
@@ -4309,7 +4312,7 @@ local Library do
                 end
             end)
 
-            local SilentLoadStart = true
+            local SilentLoadStart = false
             pcall(function()
                 local path = Library.Folders.Configs .. "/silentload.txt"
                 if isfile and isfile(path) and readfile then
@@ -4358,7 +4361,7 @@ local Library do
                     Intro["Logo"] = Instances:Create("ImageLabel", {
                         Parent = Intro["Holder"].Instance,
                         Name = "\0",
-                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                        Image = "rbxassetid://" .. Window.Logo,
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
                         Position = UDim2New(0.5, 0, 0.5, -16),
@@ -4376,27 +4379,13 @@ local Library do
                         Parent = Intro["Holder"].Instance,
                         Name = "\0",
                         FontFace = Library.Font,
-                        Text = Window.Name or "Spooki hub",
+                        Text = Window.Name,
                         TextColor3 = FromRGB(255, 50, 50),
                         TextTransparency = 1,
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
                         Position = UDim2New(0.5, 0, 0.5, 40),
                         TextSize = 20,
-                        ZIndex = 51
-                    })
-
-                    Intro["Credit"] = Instances:Create("TextLabel", {
-                        Parent = Intro["Holder"].Instance,
-                        Name = "\0",
-                        FontFace = Library.Font,
-                        Text = "by slender",
-                        TextColor3 = FromRGB(200, 200, 200),
-                        TextTransparency = 1,
-                        BackgroundTransparency = 1,
-                        AnchorPoint = Vector2New(0.5, 0.5),
-                        Position = UDim2New(0.5, 0, 0.5, 58),
-                        TextSize = math.floor(20 * 0.6),
                         ZIndex = 51
                     })
 
@@ -4409,7 +4398,7 @@ local Library do
                         TextTransparency = 1,
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
-                        Position = UDim2New(0.5, 0, 0.5, 74),
+                        Position = UDim2New(0.5, 0, 0.5, 62),
                         TextSize = 14,
                         ZIndex = 51
                     })
@@ -4531,10 +4520,6 @@ local Library do
                         TextTransparency = 0
                     })
 
-                    Intro["Credit"]:Tween(TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        TextTransparency = 0.5
-                    })
-
                     Intro["SubTitle"]:Tween(TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                         TextTransparency = 0
                     })
@@ -4559,10 +4544,6 @@ local Library do
                     })
 
                     Intro["Title"]:Tween(TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                        TextTransparency = 1
-                    })
-
-                    Intro["Credit"]:Tween(TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
                         TextTransparency = 1
                     })
 
@@ -4840,7 +4821,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 18, 0, 18),
                     AnchorPoint = Vector2New(0, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://"..Page.Icon,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 16, 0.5, 0),
                     ZIndex = 2,
@@ -4944,16 +4925,6 @@ local Library do
                 end
 
                 Page.Active = Bool 
-                
-                if Bool then
-                    for _, openFrame in pairs(Library.OpenFrames) do
-                        if openFrame and openFrame.IsSettings and openFrame.SetOpen then
-                            pcall(function()
-                                openFrame:SetOpen(false)
-                            end)
-                        end
-                    end
-                end
                 
                 Debounce = true
                 Items["Page"].Instance.Visible = Bool 
@@ -5160,7 +5131,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     ImageTransparency = 0.2,
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://101636617799068",
                     BackgroundTransparency = 1,
                     ZIndex = 3,
                     Position = UDim2New(0.5, 0, 0.5, 0),
@@ -5634,7 +5605,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 21, 0, 20),
                     AnchorPoint = Vector2New(0, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://"..Section.Icon,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 15, 0.5, 0),
                     ZIndex = 2,
@@ -6048,7 +6019,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 0, 0, 0),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://121760666525660",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     ZIndex = 2,
@@ -6470,7 +6441,7 @@ local Library do
                         BorderColor3 = FromRGB(0, 0, 0),
                         Size = UDim2New(0, 14, 0, 14),
                         AnchorPoint = Vector2New(0, 0.5),
-                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                        Image = "rbxassetid://101500482366184",
                         BackgroundTransparency = 1,
                         Position = UDim2New(1, 6, 0.5, 1),
                         ZIndex = 2,
@@ -6567,7 +6538,7 @@ local Library do
                         FontFace = Library.Font,
                         TextColor3 = FromRGB(240, 240, 240),
                         TextTransparency = 0.30000001192092896,
-                        Text = "اغلاق",
+                        Text = "Close",
                         AutomaticSize = Enum.AutomaticSize.X,
                         Size = UDim2New(0, 0, 0, 15),
                         AnchorPoint = Vector2New(0.5, 0.5),
@@ -6983,7 +6954,7 @@ local Library do
                         BorderColor3 = FromRGB(0, 0, 0),
                         Size = UDim2New(0, 18, 0, 18),
                         AnchorPoint = Vector2New(1, 0.5),
-                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                        Image = "rbxassetid://"..Button.Icon,
                         BackgroundTransparency = 1,
                         Position = UDim2New(0, -8, 0.5, 0),
                         ZIndex = 2,
@@ -7133,7 +7104,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 16, 0, 12),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://117786983271442",
                     BackgroundTransparency = 1,
                     Position = UDim2New(1, 5, 0.5, 0),
                     ZIndex = 2,
@@ -7430,7 +7401,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 16, 0, 8),
                     AnchorPoint = Vector2New(1, 0.5),
-                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
+                    Image = "rbxassetid://123317177279443",
                     BackgroundTransparency = 1,
                     Position = UDim2New(1, -5, 0.5, 0),
                     ZIndex = 2,
@@ -9454,8 +9425,8 @@ local Library do
     end
 
     Library.CreateSettingsPage = function(self, Window, KeybindList)
-        local Page = Window:Page({Name = "الاعدادات", Icon = "122669828593160"})
-        local ConfigsSection = Page:Section({Name = "الحفظ", Side = 1}) do 
+        local Page = Window:Page({Name = "Settings", Icon = "122669828593160"})
+        local ConfigsSection = Page:Section({Name = "Configs", Side = 1}) do 
             local ConfigSelected = nil
 
             local ConfigsDropdown = ConfigsSection:Listbox({
@@ -9514,7 +9485,7 @@ local Library do
             })
 
             ConfigsSection:Button({
-                Name = "حفظ",
+                Name = "Save",
                 Callback = function()
                     if ConfigSelected and isfile(Library.Folders.Configs .. "/" .. ConfigSelected) then
                         writefile(Library.Folders.Configs .. "/" .. ConfigSelected, Library:GetConfig())
@@ -9576,7 +9547,7 @@ local Library do
             end
 
             ConfigsSection:Button({
-                Name = "تشغيل تلقائي",
+                Name = "Set Auto Load Config",
                 Callback = function()
                     if ConfigSelected and isfile(Library.Folders.Configs .. "/" .. ConfigSelected) then
                         writefile(Library.Folders.Configs .. "/autoload.txt", Library.Folders.Configs .. "/" .. ConfigSelected)
@@ -9592,7 +9563,7 @@ local Library do
             })
 
             ConfigsSection:Button({
-                Name = "الغاء التشغيل التلقائي",
+                Name = "Reset Auto Load Config",
                 Callback = function()
                     local autoLoadFile = Library.Folders.Configs .. "/autoload.txt"
                     if isfile(autoLoadFile) then
@@ -9619,7 +9590,7 @@ local Library do
             end)
         end
 
-        local UISection = Page:Section({Name = "اعدادات الواجهة", Side = 2}) do
+        local UISection = Page:Section({Name = "UI Settings", Side = 2}) do
             UISection:Toggle({
                 Name = "Watermark",
                 Flag = "WatermarkToggle",
@@ -10197,9 +10168,10 @@ local function WrapWindow(jxWindow)
         end
         local page = jxWindow:Page({ Name = name, Icon = iconStr })
 
-        page:Section({ Name = "", Side = 1 })
+        -- Single control area for this tab (one place to manage controls)
+        local mainSection = page:Section({ Name = name or "Controls", Side = 1 })
+        local wrapped = WrapTab(mainSection)
 
-        local wrapped = {}
         function wrapped:AddLeftGroupbox(gname)
             local s2 = page:Section({ Name = gname or "", Side = 1 })
             return WrapTab(s2)
@@ -10224,15 +10196,11 @@ local function WrapWindow(jxWindow)
             end
             return tb
         end
-        setmetatable(wrapped, {
-            __index = function(_, k)
-                local v = page[k]
-                if type(v) == "function" then
-                    return function(self, ...) return v(page, ...) end
-                end
-                return v
-            end
-        })
+
+        -- expose page for advanced use
+        wrapped.Page = page
+        wrapped.Section = mainSection
+
         return wrapped
     end
 
@@ -10343,7 +10311,7 @@ function spookilib:Toggle()
 end
 
 function spookilib:Unload()
-    getgenv().MOLYN_HUB_Running = false
+    getgenv().SPOOKI_HUB_Running = false
     if spookilib.Holder and spookilib.Holder.Instance then
         spookilib.Holder.Instance:Destroy()
     end
@@ -10380,41 +10348,33 @@ do
         local preset = SpookiThemePresets[name]
         if not preset then return end
         local L = self._library or spookilib
-
-        -- Full professional theme map so every themed control (buttons, sections, outlines, etc.) updates
         local mapped = {
-            Accent              = preset.Accent,
-            AccentGradient      = preset.Gradient,
-            Outline             = preset.Accent,
-            Background          = preset.Background,
-            ["Background 2"]    = preset.Background,
-            ["Section Top"]     = preset.Element,
+            Accent = preset.Accent,
+            AccentGradient = preset.Gradient,
+            Outline = preset.Accent,
+            Background = preset.Background,
+            ["Background 2"] = preset.Background,
+            ["Section Top"] = preset.Element,
             ["Section Background"] = preset.SectionBg,
             ["Section Background 2"] = preset.Element,
-            Element             = preset.Element,
-            Text                = Color3.fromRGB(255, 255, 255),
+            Element = preset.Element,
+            Text = Color3.fromRGB(255, 255, 255),
         }
-
         if L.BatchUpdate then
             L:BatchUpdate(function()
                 for themeKey, color in pairs(mapped) do
                     L:ChangeTheme(themeKey, color)
                 end
             end)
-            if L.FlushBatchedThemes then
-                L:FlushBatchedThemes()
-            end
+            if L.FlushBatchedThemes then L:FlushBatchedThemes() end
         else
             for themeKey, color in pairs(mapped) do
                 L:ChangeTheme(themeKey, color)
             end
         end
-
-        -- Keep raw preset keys available too
         for key, val in pairs(preset) do
             L.Theme[key] = val
         end
-
         if spookilib.FlagDefaults then
             spookilib.FlagDefaults["SpookiThemePreset"] = name
         end
