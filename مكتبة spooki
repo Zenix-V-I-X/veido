@@ -1,11 +1,11 @@
--- MOLYN LIBRARY v1
-local MolynThemePresets = {
-    Molyn = {
-        Accent      = Color3.fromRGB(255, 50, 50),
-        Gradient    = Color3.fromRGB(180, 20, 20),
-        Background  = Color3.fromRGB(8, 8, 8),
-        SectionBg   = Color3.fromRGB(14, 10, 10),
-        Element     = Color3.fromRGB(20, 14, 14),
+-- SPOOKI HUB LIBRARY v1
+local SpookiThemePresets = {
+    Spooki = {
+        Accent      = Color3.fromRGB(40, 110, 255),
+        Gradient    = Color3.fromRGB(10, 40, 120),
+        Background  = Color3.fromRGB(4, 6, 12),
+        SectionBg   = Color3.fromRGB(8, 10, 18),
+        Element     = Color3.fromRGB(12, 16, 28),
     },
     Dark = {
         Accent      = Color3.fromRGB(65, 150, 255),
@@ -244,7 +244,7 @@ local Library do
         ["RightAlt"]          = "RightAlt"
     }
 
-    local _mp = MolynThemePresets.Molyn
+    local _mp = SpookiThemePresets.Spooki
     local Themes = {
         ["Preset"] = {
             ["AccentGradient"]        = _mp.Gradient,
@@ -261,6 +261,44 @@ local Library do
     }
 
     Library.Theme = TableClone(Themes["Preset"])
+
+    local ActiveGradients = {}
+    local function ApplySpookiBorder(instance, thickness)
+        if not instance or instance:FindFirstChild("SpookiStroke") then
+            return
+        end
+        local stroke = InstanceNew("UIStroke")
+        stroke.Name = "SpookiStroke"
+        stroke.Color = FromRGB(255, 255, 255)
+        stroke.Thickness = thickness or 1.6
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        stroke.LineJoinMode = Enum.LineJoinMode.Round
+        stroke.Parent = instance
+        local gradient = InstanceNew("UIGradient")
+        gradient.Name = "SpookiGradient"
+        gradient.Color = RGBSequence({
+            RGBSequenceKeypoint(0, FromRGB(40, 110, 255)),
+            RGBSequenceKeypoint(0.25, FromRGB(10, 20, 40)),
+            RGBSequenceKeypoint(0.5, FromRGB(0, 0, 0)),
+            RGBSequenceKeypoint(0.75, FromRGB(10, 20, 40)),
+            RGBSequenceKeypoint(1, FromRGB(40, 110, 255))
+        })
+        gradient.Rotation = math.random(0, 359)
+        gradient.Parent = stroke
+        TableInsert(ActiveGradients, gradient)
+        return stroke
+    end
+
+    RunService.RenderStepped:Connect(function(dt)
+        for i = #ActiveGradients, 1, -1 do
+            local gradient = ActiveGradients[i]
+            if gradient and gradient.Parent then
+                gradient.Rotation = (gradient.Rotation + 90 * dt) % 360
+            else
+                TableRemove(ActiveGradients, i)
+            end
+        end
+    end)
 
     local Tween = { } do
         Tween.__index = Tween
@@ -374,6 +412,13 @@ local Library do
             end
 
             return NewItem
+        end
+
+        Instances.ApplyBorder = function(self, thickness)
+            if self and self.Instance then
+                ApplySpookiBorder(self.Instance, thickness)
+            end
+            return self
         end
 
         Instances.FadeItem = function(self, Visibility, Speed)
@@ -743,6 +788,18 @@ local Library do
         DisplayOrder = 2,
         ResetOnSpawn = false
     })
+
+    local function shouldBorder(inst)
+        return inst:IsA("TextButton") or inst:IsA("TextBox") or (inst:IsA("Frame") and inst.BackgroundTransparency < 1)
+    end
+
+    Library.Holder.Instance.DescendantAdded:Connect(function(inst)
+        task.defer(function()
+            if inst and inst.Parent and shouldBorder(inst) then
+                ApplySpookiBorder(inst, inst:IsA("TextButton") and 1.5 or 1.3)
+            end
+        end)
+    end)
 
     Library.UnusedHolder = Instances:Create("ScreenGui", {
         Parent = gethui(),
@@ -1271,7 +1328,7 @@ local Library do
                         BorderColor3 = FromRGB(0, 0, 0),
                         Size = UDim2New(0, 16, 0, 16),
                         AnchorPoint = Vector2New(0.5, 1),
-                        Image = "rbxassetid://92464809279921",
+                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                         Name = "nig",
                         BackgroundTransparency = 1,
                         Position = UDim2New(1, -16, 1, -6),
@@ -1548,14 +1605,14 @@ local Library do
                     BorderSizePixel = 0,
                     CanvasSize = UDim2New(0, 0, 0, 0),
                     ScrollBarImageColor3 = FromRGB(124, 163, 255),
-                    MidImage = "rbxassetid://86870199131153",
+                    MidImage = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BorderColor3 = FromRGB(0, 0, 0),
                     ScrollBarThickness = 0,
                     Size = UDim2New(1, -20, 0, 69),
                     Selectable = false,
-                    TopImage = "rbxassetid://86870199131153",
+                    TopImage = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     Position = UDim2New(0, 10, 1, -30),
-                    BottomImage = "rbxassetid://86870199131153",
+                    BottomImage = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 }) 
@@ -2285,7 +2342,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 21, 0, 20),
                     AnchorPoint = Vector2New(0, 0.5),
-                    Image = "rbxassetid://81598136527047",
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 15, 0.5, 0),
                     ZIndex = 2,
@@ -2554,7 +2611,7 @@ local Library do
                     ImageColor3 = FromRGB(255, 255, 255),
                     BorderColor3 = FromRGB(0, 0, 0),
                     AnchorPoint = Vector2New(1, 0),
-                    Image = "rbxassetid://" .. (Data.Icon or "87107896404147"),
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(1, 0, 0, 0),
                     Size = UDim2New(0, 16, 0, 16),
@@ -2804,7 +2861,7 @@ local Library do
                         Parent = Items["FloatingButton"].Instance,
                         BorderColor3 = FromRGB(0, 0, 0),
                         Name = "\0",
-                        Image = "rbxassetid://73756298533665",
+                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
                         Position = UDim2New(0.5, 0, 0.5, 0),
@@ -2897,7 +2954,7 @@ local Library do
                     ScaleType = Enum.ScaleType.Fit,
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 35, 0, 35),
-                    Image = "rbxassetid://"..Window.Logo,
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 12, 0, 12),
                     ZIndex = 2,
@@ -2994,7 +3051,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 11, 0, 11),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxassetid://130510492706892",
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     ZIndex = 3,
@@ -3209,7 +3266,7 @@ local Library do
                     local val = Library.Flags["BackgroundTransparency"]
                     local numVal = tonumber(val) or 0
                     Items["MainFrame"].Instance.BackgroundTransparency = numVal
-                    if not Library.Flags["MolynBgImageEnabled"] then
+                    if not Library.Flags["SpookiBgImageEnabled"] then
                         Items["Content"].Instance.BackgroundTransparency = numVal
                         Items["LeftTabs"].Instance.BackgroundTransparency = numVal
                     end
@@ -3290,7 +3347,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 11, 0, 11),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxassetid://79384247470010",
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     ZIndex = 3,
@@ -3376,7 +3433,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 15, 0, 14),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxassetid://122669828593160",
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     ZIndex = 3,
@@ -3502,7 +3559,7 @@ local Library do
                         FontFace = Library.Font,
                         TextColor3 = FromRGB(240, 240, 240),
                         TextTransparency = 0.30000001192092896,
-                        Text = "Close",
+                        Text = "اغلاق",
                         AutomaticSize = Enum.AutomaticSize.X,
                         Size = UDim2New(0, 0, 0, 15),
                         AnchorPoint = Vector2New(0.5, 0.5),
@@ -3610,10 +3667,11 @@ local Library do
                             end
     
                             SettingsItems["Settings"].Instance.Visible = true
-                            SettingsItems["Settings"].Instance.Parent = Library.Holder.Instance
+                            SettingsItems["Settings"].Instance.Parent = Items["MainFrame"].Instance
                             
                             RenderStepped = RunService.RenderStepped:Connect(function()
-                                SettingsItems["Settings"].Instance.Position = UDim2New(0, Items["SettingsIcon"].Instance.AbsolutePosition.X, 0, Items["SettingsIcon"].Instance.AbsolutePosition.Y + Items["SettingsButton"].Instance.AbsoluteSize.Y + 108)
+                                local icon = Items["SettingsButton"].Instance
+                                SettingsItems["Settings"].Instance.Position = UDim2New(0, icon.Position.X.Offset - 280, 0, icon.Position.Y.Offset + 36)
                                 SettingsItems["Settings"].Instance.Size = UDim2New(0, 325, 0, 230)
                             end)
         
@@ -3671,7 +3729,7 @@ local Library do
                             Debounce = false 
                             SettingsItems["Settings"].Instance.Visible = Settings.IsOpen
                             task.wait(0.2)
-                            SettingsItems["Settings"].Instance.Parent = not Settings.IsOpen and Library.UnusedHolder.Instance or Library.Holder.Instance
+                            SettingsItems["Settings"].Instance.Parent = not Settings.IsOpen and Library.UnusedHolder.Instance or Items["MainFrame"].Instance
                         end)
                     end
     
@@ -3689,7 +3747,7 @@ local Library do
                     setmetatable(Settings, Library.Sections)
                 end
 
-                Settings:Label("First gradient color"):Colorpicker({
+                Settings:Label("لون التدرج الاول"):Colorpicker({
                     Flag = "AccentColor",
                     Default = Library.Theme.Accent,
                     Callback = function(Color)
@@ -3698,7 +3756,7 @@ local Library do
                     end
                 })
 
-                Settings:Label("Second gradient color"):Colorpicker({
+                Settings:Label("لون التدرج الثاني"):Colorpicker({
                     Flag = "AccentGradientColor",
                     Default = Library.Theme.AccentGradient,
                     Callback = function(Color)
@@ -3708,7 +3766,7 @@ local Library do
                 })
 
                 Settings:Dropdown({
-                    Name = "Font weight",
+                    Name = "سمك الخط",
                     Flag = "FontStyle",
                     Default = "SemiBold",
                     Items = {"Light", "Regular", "SemiBold", "Indie Flower", "Fredoka One", "Cartoon"},
@@ -3723,7 +3781,7 @@ local Library do
                 })
 
                 Settings:Dropdown({
-                    Name = "Notification Position",
+                    Name = "مكان الاشعارات",
                     Flag = "NotificationPosition",
                     Default = "Right",
                     Items = {"Right", "Left"},
@@ -3739,7 +3797,7 @@ local Library do
                 })
 
                 Settings:Slider({
-                    Name = "Background Transparency",
+                    Name = "شفافية الخلفية",
                     Default = 1,
                     Decimals = 0.01,
                     Max = 1,
@@ -3752,7 +3810,7 @@ local Library do
                 })
 
                 Settings:Slider({
-                    Name = "UI Size",
+                    Name = "حجم الواجهة",
                     Default = IsMobile and 0.56 or 1,
                     Decimals = 0.01,
                     Max = 1.3,
@@ -3766,7 +3824,7 @@ local Library do
                 })
 
                 Settings:Keybind({
-                    Name = "Menu Keybind",
+                    Name = "زر فتح القائمة",
                     Flag = "MenuBind",
                     Default = Enum.KeyCode.RightAlt,
                     Callback = function(Value)
@@ -3775,12 +3833,12 @@ local Library do
                 })
 
                 Settings:Dropdown({
-                    Name = "Theme Preset",
-                    Flag = "MolynThemePreset",
-                    Default = "Molyn",
-                    Items = {"Molyn", "Dark", "Darker", "Purple"},
+                    Name = "شكل الثيم",
+                    Flag = "SpookiThemePreset",
+                    Default = "Spooki",
+                    Items = {"Spooki", "Dark", "Darker", "Purple"},
                     Callback = function(Value)
-                        local preset = MolynThemePresets[Value]
+                        local preset = SpookiThemePresets[Value]
                         if not preset then return end
                         Library.Theme["Accent"]              = preset.Accent
                         Library.Theme["AccentGradient"]      = preset.Gradient
@@ -3808,11 +3866,11 @@ local Library do
                     end
                 })
 
-                local BG_IMAGE_ID  = "rbxassetid://87107896404147"
+                local BG_IMAGE_ID  = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420"
                 local BgImageLabel = nil
                 local BgTintLabel  = nil
 
-                Window.MolynBg = Window.MolynBg or {
+                Window.SpookiBg = Window.SpookiBg or {
                     FullHub     = true,
                     Transparency = 0.01,
                 }
@@ -3841,7 +3899,7 @@ local Library do
                     if not Visible then return end
 
                     local parentFrame = Items["MainFrame"].Instance
-                    local isFullHub = Window.MolynBg and Window.MolynBg.FullHub
+                    local isFullHub = Window.SpookiBg and Window.SpookiBg.FullHub
                     local LEFTTABS_W = 225
 
                     local xOff = isFullHub and -LEFTTABS_W or 0
@@ -3849,12 +3907,12 @@ local Library do
 
                     BgImageLabel = InstanceNew("ImageLabel")
                     BgImageLabel.Parent              = parentFrame
-                    BgImageLabel.Name                = "MolynBgImage"
+                    BgImageLabel.Name                = "SpookiBgImage"
                     BgImageLabel.Image               = BG_IMAGE_ID
                     BgImageLabel.Size                = UDim2New(1, xExt, 1, 0)
                     BgImageLabel.Position            = UDim2New(0, xOff, 0, 0)
                     BgImageLabel.BackgroundTransparency = 1
-                    BgImageLabel.ImageTransparency   = Window.MolynBg.Transparency or 0.01
+                    BgImageLabel.ImageTransparency   = Window.SpookiBg.Transparency or 0.01
                     BgImageLabel.ScaleType           = Enum.ScaleType.Crop
                     BgImageLabel.ZIndex              = 1
                     BgImageLabel.BorderSizePixel     = 0
@@ -3865,11 +3923,11 @@ local Library do
 
                     BgTintLabel = InstanceNew("Frame")
                     BgTintLabel.Parent               = parentFrame
-                    BgTintLabel.Name                 = "MolynBgTint"
+                    BgTintLabel.Name                 = "SpookiBgTint"
                     BgTintLabel.Size                 = UDim2New(1, xExt, 1, 0)
                     BgTintLabel.Position             = UDim2New(0, xOff, 0, 0)
-                    BgTintLabel.BackgroundTransparency = 0.5
-                    BgTintLabel.BackgroundColor3     = FromRGB(0, 0, 0)
+                    BgTintLabel.BackgroundTransparency = 0.35
+                    BgTintLabel.BackgroundColor3     = FromRGB(0, 8, 20)
                     BgTintLabel.ZIndex               = 1
                     BgTintLabel.BorderSizePixel      = 0
 
@@ -3883,34 +3941,13 @@ local Library do
                     ApplyBgImage(true)
                 end)
 
-                Settings:Toggle({
-                    Name = "Background Image",
-                    Flag = "MolynBgImageEnabled",
-                    Default = true,
-                    Callback = function(Value)
-                        ApplyBgImage(Value)
-                    end
-                })
-
-                Settings:Toggle({
-                    Name = "Full Hub Background",
-                    Flag = "MolynBgFullHub",
-                    Default = true,
-                    Callback = function(Value)
-                        Window.MolynBg.FullHub = Value
-                        if Library.Flags["MolynBgImageEnabled"] then
-                            ApplyBgImage(true)
-                        end
-                    end
-                })
-
-                Window.MolynApplyBg = ApplyBgImage
+                Window.SpookiApplyBg = ApplyBgImage
 
                 Settings:Button({
-                    Name = "Reset to Defaults",
+                    Name = "ارجاع الافتراضي",
                     Callback = function()
 
-                        local preset = MolynThemePresets.Molyn
+                        local preset = SpookiThemePresets.Spooki
                         Library.Theme["Accent"]              = preset.Accent
                         Library.Theme["AccentGradient"]      = preset.Gradient
                         Library.Theme["Background"]          = preset.Background
@@ -3936,7 +3973,7 @@ local Library do
                         Window:SetTransparency()
                         Window:SetUIScale()
                         Library:Notification({
-                            Title   = "Molyn Hub",
+                            Title   = "Spooki Hub",
                             Description = "Settings reset to defaults.",
                             Duration = 2,
                             Icon = "87107896404147"
@@ -3949,7 +3986,7 @@ local Library do
                     Callback = function()
                         Library:TriggerEmergencyStop()
                         Library:Notification({
-                            Title   = "Molyn Hub",
+                            Title   = "Spooki Hub",
                             Description = "Stopped all auto-teleport and Tween activity.",
                             Duration = 2,
                             Icon = "87107896404147"
@@ -3971,7 +4008,7 @@ local Library do
                             end
                         end)
 
-                        local preset = MolynThemePresets.Molyn
+                        local preset = SpookiThemePresets.Spooki
                         Library.Theme["Accent"]              = preset.Accent
                         Library.Theme["AccentGradient"]      = preset.Gradient
                         Library.Theme["Background"]          = preset.Background
@@ -3998,7 +4035,7 @@ local Library do
                         Window:SetUIScale()
 
                         Library:Notification({
-                            Title   = "Molyn Hub",
+                            Title   = "Spooki Hub",
                             Description = "Formatted: all settings wiped and reset to defaults.",
                             Duration = 3,
                             Icon = "87107896404147"
@@ -4022,6 +4059,15 @@ local Library do
                 end
 
                 Window.IsOpen = Bool
+                if not Bool then
+                    for _, openFrame in pairs(Library.OpenFrames) do
+                        if openFrame and openFrame.SetOpen then
+                            pcall(function()
+                                openFrame:SetOpen(false)
+                            end)
+                        end
+                    end
+                end
 
                 Debounce = true 
 
@@ -4038,8 +4084,8 @@ local Library do
 
                 for Index, Value in Descendants do 
 
-                    if Value.Name == "MolynBgImage" then
-                        local visibleTp = Window.MolynBg.Transparency or 0.01
+                    if Value.Name == "SpookiBgImage" then
+                        local visibleTp = Window.SpookiBg.Transparency or 0.01
                         if Bool then
                             Value.ImageTransparency = 1
                             NewTween = Tween:Create(Value, TweenInfo.new(Library.FadeSpeed, Library.Tween.Style, Library.Tween.Direction), {
@@ -4057,11 +4103,11 @@ local Library do
                         continue
                     end
 
-                    if Value.Name == "MolynBgTint" then
+                    if Value.Name == "SpookiBgTint" then
                         if Bool then
                             Value.BackgroundTransparency = 1
                             NewTween = Tween:Create(Value, TweenInfo.new(Library.FadeSpeed, Library.Tween.Style, Library.Tween.Direction), {
-                                BackgroundTransparency = 0.5
+                                BackgroundTransparency = 0.35
                             }, true)
                         else
                             NewTween = Tween:Create(Value, TweenInfo.new(Library.FadeSpeed, Library.Tween.Style, Library.Tween.Direction), {
@@ -4154,19 +4200,19 @@ local Library do
                         end
                     end
 
-                    if Window.MolynBg then
-                        Window.MolynBg.Transparency = 0.01
+                    if Window.SpookiBg then
+                        Window.SpookiBg.Transparency = 0.01
                     end
-                    if Library.Flags["MolynBgImageEnabled"] == nil then
-                        Library.Flags["MolynBgImageEnabled"] = true
+                    if Library.Flags["SpookiBgImageEnabled"] == nil then
+                        Library.Flags["SpookiBgImageEnabled"] = true
                     end
-                    if Library.Flags["MolynBgFullHub"] == nil then
-                        Library.Flags["MolynBgFullHub"] = true
+                    if Library.Flags["SpookiBgFullHub"] == nil then
+                        Library.Flags["SpookiBgFullHub"] = true
                     end
-                    Window.MolynBg.FullHub = Library.Flags["MolynBgFullHub"]
+                    Window.SpookiBg.FullHub = Library.Flags["SpookiBgFullHub"]
 
-                    if Window.MolynApplyBg and Library.Flags["MolynBgImageEnabled"] then
-                        Window.MolynApplyBg(true)
+                    if Window.SpookiApplyBg and Library.Flags["SpookiBgImageEnabled"] then
+                        Window.SpookiApplyBg(true)
                     end
 
                     Window:SetTransparency()
@@ -4184,7 +4230,7 @@ local Library do
                             pcall(function()
                                 local folder = Library.Folders and Library.Folders.Configs
                                 if not folder then
-                                    local dir = (Library.Folders and Library.Folders.Directory) or "MolynHub"
+                                    local dir = (Library.Folders and Library.Folders.Directory) or "SpookiHub"
                                     folder = dir .. "/Configs"
                                 end
                                 if not isfolder(folder) then
@@ -4255,7 +4301,7 @@ local Library do
                     Intro["Logo"] = Instances:Create("ImageLabel", {
                         Parent = Intro["Holder"].Instance,
                         Name = "\0",
-                        Image = "rbxassetid://" .. Window.Logo,
+                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
                         Position = UDim2New(0.5, 0, 0.5, -16),
@@ -4367,7 +4413,7 @@ local Library do
                                 local autoSaveFile = folder .. "/autosave.json"
                                 if isfile and isfile(autoSaveFile) then delfile(autoSaveFile) end
                             end
-                            local preset = MolynThemePresets.Molyn
+                            local preset = SpookiThemePresets.Spooki
                             Library.Theme["Accent"]         = preset.Accent
                             Library.Theme["AccentGradient"] = preset.Gradient
                             Library.Theme["Background"]     = preset.Background
@@ -4392,7 +4438,7 @@ local Library do
                             Window:SetTransparency()
                             Window:SetUIScale()
                             Library:Notification({
-                                Title   = "Molyn Hub",
+                                Title   = "Spooki Hub",
                                 Description = "Formatted: all settings wiped and reset to defaults.",
                                 Duration = 3,
                                 Icon = "87107896404147"
@@ -4715,7 +4761,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 18, 0, 18),
                     AnchorPoint = Vector2New(0, 0.5),
-                    Image = "rbxassetid://"..Page.Icon,
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 16, 0.5, 0),
                     ZIndex = 2,
@@ -4819,6 +4865,16 @@ local Library do
                 end
 
                 Page.Active = Bool 
+                
+                if Bool then
+                    for _, openFrame in pairs(Library.OpenFrames) do
+                        if openFrame and openFrame.IsSettings and openFrame.SetOpen then
+                            pcall(function()
+                                openFrame:SetOpen(false)
+                            end)
+                        end
+                    end
+                end
                 
                 Debounce = true
                 Items["Page"].Instance.Visible = Bool 
@@ -5025,7 +5081,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     ImageTransparency = 0.2,
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxassetid://101636617799068",
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     ZIndex = 3,
                     Position = UDim2New(0.5, 0, 0.5, 0),
@@ -5499,7 +5555,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 21, 0, 20),
                     AnchorPoint = Vector2New(0, 0.5),
-                    Image = "rbxassetid://"..Section.Icon,
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 15, 0.5, 0),
                     ZIndex = 2,
@@ -5913,7 +5969,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 0, 0, 0),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxassetid://121760666525660",
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(0.5, 0, 0.5, 0),
                     ZIndex = 2,
@@ -6335,7 +6391,7 @@ local Library do
                         BorderColor3 = FromRGB(0, 0, 0),
                         Size = UDim2New(0, 14, 0, 14),
                         AnchorPoint = Vector2New(0, 0.5),
-                        Image = "rbxassetid://101500482366184",
+                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                         BackgroundTransparency = 1,
                         Position = UDim2New(1, 6, 0.5, 1),
                         ZIndex = 2,
@@ -6432,7 +6488,7 @@ local Library do
                         FontFace = Library.Font,
                         TextColor3 = FromRGB(240, 240, 240),
                         TextTransparency = 0.30000001192092896,
-                        Text = "Close",
+                        Text = "اغلاق",
                         AutomaticSize = Enum.AutomaticSize.X,
                         Size = UDim2New(0, 0, 0, 15),
                         AnchorPoint = Vector2New(0.5, 0.5),
@@ -6848,7 +6904,7 @@ local Library do
                         BorderColor3 = FromRGB(0, 0, 0),
                         Size = UDim2New(0, 18, 0, 18),
                         AnchorPoint = Vector2New(1, 0.5),
-                        Image = "rbxassetid://"..Button.Icon,
+                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                         BackgroundTransparency = 1,
                         Position = UDim2New(0, -8, 0.5, 0),
                         ZIndex = 2,
@@ -6998,7 +7054,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 16, 0, 12),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    Image = "rbxassetid://117786983271442",
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(1, 5, 0.5, 0),
                     ZIndex = 2,
@@ -7295,7 +7351,7 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Size = UDim2New(0, 16, 0, 8),
                     AnchorPoint = Vector2New(1, 0.5),
-                    Image = "rbxassetid://123317177279443",
+                    Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                     BackgroundTransparency = 1,
                     Position = UDim2New(1, -5, 0.5, 0),
                     ZIndex = 2,
@@ -9319,8 +9375,8 @@ local Library do
     end
 
     Library.CreateSettingsPage = function(self, Window, KeybindList)
-        local Page = Window:Page({Name = "Settings", Icon = "122669828593160"})
-        local ConfigsSection = Page:Section({Name = "Configs", Side = 1}) do 
+        local Page = Window:Page({Name = "الاعدادات", Icon = "122669828593160"})
+        local ConfigsSection = Page:Section({Name = "الحفظ", Side = 1}) do 
             local ConfigSelected = nil
 
             local ConfigsDropdown = ConfigsSection:Listbox({
@@ -9379,7 +9435,7 @@ local Library do
             })
 
             ConfigsSection:Button({
-                Name = "Save",
+                Name = "حفظ",
                 Callback = function()
                     if ConfigSelected and isfile(Library.Folders.Configs .. "/" .. ConfigSelected) then
                         writefile(Library.Folders.Configs .. "/" .. ConfigSelected, Library:GetConfig())
@@ -9441,7 +9497,7 @@ local Library do
             end
 
             ConfigsSection:Button({
-                Name = "Set Auto Load Config",
+                Name = "تشغيل تلقائي",
                 Callback = function()
                     if ConfigSelected and isfile(Library.Folders.Configs .. "/" .. ConfigSelected) then
                         writefile(Library.Folders.Configs .. "/autoload.txt", Library.Folders.Configs .. "/" .. ConfigSelected)
@@ -9457,7 +9513,7 @@ local Library do
             })
 
             ConfigsSection:Button({
-                Name = "Reset Auto Load Config",
+                Name = "الغاء التشغيل التلقائي",
                 Callback = function()
                     local autoLoadFile = Library.Folders.Configs .. "/autoload.txt"
                     if isfile(autoLoadFile) then
@@ -9484,7 +9540,7 @@ local Library do
             end)
         end
 
-        local UISection = Page:Section({Name = "UI Settings", Side = 2}) do
+        local UISection = Page:Section({Name = "اعدادات الواجهة", Side = 2}) do
             UISection:Toggle({
                 Name = "Watermark",
                 Flag = "WatermarkToggle",
@@ -9644,7 +9700,7 @@ end
 
 getgenv().Library = Library
 
-local molynlib = Library
+local spookilib = Library
 
 local function ResolveIcon(icon)
     if not icon or icon == "" then return "" end
@@ -9652,14 +9708,14 @@ local function ResolveIcon(icon)
     return icon
 end
 
-molynlib.Options  = {}
-molynlib.Toggles  = {}
+spookilib.Options  = {}
+spookilib.Toggles  = {}
 
 local function CacheOption(flag, wrapper, isToggle)
     if not flag then return wrapper end
     if type(flag) == "string" then
-        molynlib.Options[flag] = wrapper
-        if isToggle then molynlib.Toggles[flag] = wrapper end
+        spookilib.Options[flag] = wrapper
+        if isToggle then spookilib.Toggles[flag] = wrapper end
     end
     return wrapper
 end
@@ -10106,9 +10162,9 @@ local function WrapWindow(jxWindow)
 
     function win:Notify(cfg, dur)
         if type(cfg) == "string" then
-            molynlib:Notification({ Title = "Notification", Description = cfg, Duration = dur or 3 })
+            spookilib:Notification({ Title = "Notification", Description = cfg, Duration = dur or 3 })
         elseif type(cfg) == "table" then
-            molynlib:Notification({
+            spookilib:Notification({
                 Title = cfg.Title or "Notification",
                 Description = cfg.Description or cfg.Text or cfg[1] or "",
                 Duration = cfg.Duration or cfg.Time or 3,
@@ -10128,22 +10184,22 @@ local function WrapWindow(jxWindow)
     return win
 end
 
-function molynlib:CreateWindow(cfg)
+function spookilib:CreateWindow(cfg)
     cfg = cfg or {}
-    local title    = cfg.Title or cfg.Name or "MOLYN HUB"
+    local title    = cfg.Title or cfg.Name or "SPOOKI HUB"
     local subtitle = cfg.Footer or cfg.SubTitle or cfg[2] or ""
     local icon     = cfg.Icon or cfg.Logo or "87107896404147"
     local font     = cfg.Font
 
     if cfg.NotifySide then
-        molynlib:SetNotifySide(cfg.NotifySide)
+        spookilib:SetNotifySide(cfg.NotifySide)
     end
 
     if font then
-        molynlib.Font = font
+        spookilib.Font = font
     end
 
-    local jxWin = molynlib:Window({
+    local jxWin = spookilib:Window({
         Name    = title,
         SubName = subtitle,
         Logo    = icon,
@@ -10164,103 +10220,103 @@ function molynlib:CreateWindow(cfg)
     end
 
     local wrapped = WrapWindow(jxWin)
-    wrapped.MolynBg = jxWin.MolynBg
+    wrapped.SpookiBg = jxWin.SpookiBg
     wrapped.Items = jxWin.Items
     wrapped.Window = jxWin
 
     return wrapped
 end
 
-function molynlib:Notify(text, duration)
+function spookilib:Notify(text, duration)
     if type(text) == "string" then
-        molynlib:Notification({ Title = "Notification", Description = text, Duration = duration or 3 })
+        spookilib:Notification({ Title = "Notification", Description = text, Duration = duration or 3 })
     elseif type(text) == "table" then
-        molynlib:Notification(text)
+        spookilib:Notification(text)
     end
 end
 
-function molynlib:SetNotifySide(side)
-    if molynlib.NotifHolder and molynlib.NotifHolder.Instance then
+function spookilib:SetNotifySide(side)
+    if spookilib.NotifHolder and spookilib.NotifHolder.Instance then
         local pos = (side == "Left") and UDim2.new(0, 15, 1, -15) or UDim2.new(1, -15, 1, -15)
-        molynlib.NotifHolder.Instance.Position = pos
-        molynlib.NotifHolder.Instance.AnchorPoint = (side == "Left") and Vector2.new(0, 1) or Vector2.new(1, 1)
+        spookilib.NotifHolder.Instance.Position = pos
+        spookilib.NotifHolder.Instance.AnchorPoint = (side == "Left") and Vector2.new(0, 1) or Vector2.new(1, 1)
     end
 end
 
-function molynlib:SetDPIScale(dpi)
+function spookilib:SetDPIScale(dpi)
 
     local scale = dpi / 100
-    if molynlib.Holder and molynlib.Holder.Instance then
-        local uiScale = molynlib.Holder.Instance:FindFirstChildOfClass("UIScale")
+    if spookilib.Holder and spookilib.Holder.Instance then
+        local uiScale = spookilib.Holder.Instance:FindFirstChildOfClass("UIScale")
         if not uiScale then
             uiScale = Instance.new("UIScale")
             uiScale.Name = "DPI_Scale"
-            uiScale.Parent = molynlib.Holder.Instance
+            uiScale.Parent = spookilib.Holder.Instance
         end
         uiScale.Scale = scale
     end
 end
 
-function molynlib:Toggle()
-    if molynlib.Holder and molynlib.Holder.Instance then
-        molynlib.Holder.Instance.Enabled = not molynlib.Holder.Instance.Enabled
+function spookilib:Toggle()
+    if spookilib.Holder and spookilib.Holder.Instance then
+        spookilib.Holder.Instance.Enabled = not spookilib.Holder.Instance.Enabled
     end
 end
 
-function molynlib:Unload()
+function spookilib:Unload()
     getgenv().MOLYN_HUB_Running = false
-    if molynlib.Holder and molynlib.Holder.Instance then
-        molynlib.Holder.Instance:Destroy()
+    if spookilib.Holder and spookilib.Holder.Instance then
+        spookilib.Holder.Instance:Destroy()
     end
-    for _, conn in ipairs(molynlib.Connections or {}) do
+    for _, conn in ipairs(spookilib.Connections or {}) do
         pcall(conn.Disconnect, conn)
     end
-    molynlib.Unloaded = true
+    spookilib.Unloaded = true
 end
 
-molynlib.KeybindFrame = {
+spookilib.KeybindFrame = {
     Visible = false,
 }
 
-molynlib.Themes = {
-    Molyn  = MolynThemePresets.Molyn,
-    Dark   = MolynThemePresets.Dark,
-    Darker = MolynThemePresets.Darker,
-    Purple = MolynThemePresets.Purple,
+spookilib.Themes = {
+    Spooki  = SpookiThemePresets.Spooki,
+    Dark   = SpookiThemePresets.Dark,
+    Darker = SpookiThemePresets.Darker,
+    Purple = SpookiThemePresets.Purple,
 }
 
 do
     local tm = {
         _library = nil,
-        _folder  = "MOLYN HUB",
+        _folder  = "SPOOKI HUB",
         _tab     = nil,
-        Themes   = molynlib.Themes,
+        Themes   = spookilib.Themes,
     }
     function tm:SetLibrary(lib)          self._library = lib end
-    function tm:ApplyToTab(tab)          self._tab = tab; molynlib.Flags["MolynThemePreset"] = "Molyn" end
+    function tm:ApplyToTab(tab)          self._tab = tab; spookilib.Flags["SpookiThemePreset"] = "Spooki" end
     function tm:SetFolder(folder)        self._folder = folder end
     function tm:GetFolder()              return self._folder end
     function tm:LoadDefault() end
     function tm:SetTheme(name)
-        local preset = MolynThemePresets[name]
+        local preset = SpookiThemePresets[name]
         if not preset then return end
-        local L = self._library or molynlib
+        local L = self._library or spookilib
         for key, val in pairs(preset) do
             L.Theme[key] = val
         end
         L:ChangeTheme("Accent", preset.Accent)
         L:ChangeTheme("AccentGradient", preset.Gradient)
-        if molynlib.FlagDefaults then
-            molynlib.FlagDefaults["MolynThemePreset"] = name
+        if spookilib.FlagDefaults then
+            spookilib.FlagDefaults["SpookiThemePreset"] = name
         end
     end
-    molynlib.ThemeManager = tm
+    spookilib.ThemeManager = tm
 end
 
 do
     local sm = {
         _library       = nil,
-        _folder        = "MOLYN HUB",
+        _folder        = "SPOOKI HUB",
         _ignoreTheme   = false,
         _ignoreIndexes = {},
     }
@@ -10272,7 +10328,7 @@ do
     function sm:BuildConfigSection(tab) end
 
     function sm:LoadAutoloadConfig()
-        local L = self._library or molynlib
+        local L = self._library or spookilib
         if L.Folders and L.Folders.Configs then
             local path = L.Folders.Configs .. "/autosave.json"
             if isfile and isfile(path) then
@@ -10284,7 +10340,7 @@ do
     end
 
     function sm:Save()
-        local L = self._library or molynlib
+        local L = self._library or spookilib
         if L.Folders and L.Folders.Configs and L.Folders.Directory then
             local path = L.Folders.Configs .. "/config.json"
             pcall(function()
@@ -10298,7 +10354,7 @@ do
     end
 
     function sm:Load()
-        local L = self._library or molynlib
+        local L = self._library or spookilib
         if L.Folders and L.Folders.Configs then
             local path = L.Folders.Configs .. "/config.json"
             if isfile and isfile(path) then
@@ -10309,27 +10365,27 @@ do
         end
     end
 
-    molynlib.SaveManager = sm
+    spookilib.SaveManager = sm
 end
 
-molynlib.Save = { Theme = "Molyn" }
+spookilib.Save = { Theme = "Spooki" }
 
-function molynlib:Toggle()
-    if molynlib.Holder then
-        molynlib.Holder.Instance.Enabled = not molynlib.Holder.Instance.Enabled
+function spookilib:Toggle()
+    if spookilib.Holder then
+        spookilib.Holder.Instance.Enabled = not spookilib.Holder.Instance.Enabled
     end
 end
 
-setmetatable(molynlib, {
+setmetatable(spookilib, {
     __newindex = function(t, k, v)
         rawset(t, k, v)
         if k == "ToggleKeybind" and type(v) == "table" then
             local UIS = game:GetService("UserInputService")
             UIS.InputBegan:Connect(function(input, gpe)
                 if gpe then return end
-                local cur = rawget(molynlib, "ToggleKeybind")
+                local cur = rawget(spookilib, "ToggleKeybind")
                 if cur and cur.Value and input.KeyCode == cur.Value then
-                    molynlib:Toggle()
+                    spookilib:Toggle()
                 end
             end)
         end
@@ -10340,8 +10396,8 @@ setmetatable(molynlib, {
     end
 })
 
-getgenv().molynlib = molynlib
-getgenv().redzlib  = molynlib
-getgenv().Library  = molynlib
+getgenv().spookilib = spookilib
+getgenv().redzlib  = spookilib
+getgenv().Library  = spookilib
 
-return molynlib
+return spookilib
