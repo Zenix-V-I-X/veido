@@ -551,13 +551,12 @@ local Library do
         
             Library:Connect(UserInputService.InputChanged, function(Input)
                 if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) and Dragging then
-                    local scale = GetUIScale()
                     local DragDelta = Input.Position - DragStart
                     Gui.Position = UDim2New(
                         StartPosition.X.Scale,
-                        StartPosition.X.Offset + (DragDelta.X / scale),
+                        StartPosition.X.Offset + DragDelta.X,
                         StartPosition.Y.Scale,
-                        StartPosition.Y.Offset + (DragDelta.Y / scale)
+                        StartPosition.Y.Offset + DragDelta.Y
                     )
                 end
             end)
@@ -2716,7 +2715,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
                     AnchorPoint = Vector2New(0.5, 0.5),
-                    BackgroundTransparency = 0.12,
+                    BackgroundTransparency = 0.35,
                     Position = UDim2New(0.5519999861717224, 0, 0.5, 0),
                     Size = UDim2New(0, 677, 0, 644),
                     ZIndex = 2,
@@ -2800,14 +2799,15 @@ Library.NotifHolder  = Instances:Create("Frame", {
                         return
                     end
                     if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) and Dragging then
-                        local scale = GetWindowScale()
+                        -- 1:1 with finger (no scale amplification)
                         local DragDelta = Input.Position - DragStart
                         Gui.Position = UDim2New(
                             StartPosition.X.Scale,
-                            StartPosition.X.Offset + (DragDelta.X / scale),
+                            StartPosition.X.Offset + DragDelta.X,
                             StartPosition.Y.Scale,
-                            StartPosition.Y.Offset + (DragDelta.Y / scale)
+                            StartPosition.Y.Offset + DragDelta.Y
                         )
+                        -- Keep settings panel locked to main window if parented under it
                     end
                 end)
 
@@ -2869,13 +2869,13 @@ Library.NotifHolder  = Instances:Create("Frame", {
                         Parent = Items["FloatingButton"].Instance,
                         BorderColor3 = FromRGB(0, 0, 0),
                         Name = "\0",
-                        Image = "rbxassetid://73756298533665",
+                        Image = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420",
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
                         Position = UDim2New(0.5, 0, 0.5, 0),
                         ZIndex = 128,
                         Size = UDim2New(1, 0, 1, 0),
-                        ScaleType = Enum.ScaleType.Stretch,
+                        ScaleType = Enum.ScaleType.Crop,
                         BorderSizePixel = 0,
                         BackgroundColor3 = FromRGB(255, 255, 255)
                     })
@@ -2912,14 +2912,16 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Library:Connect(UserInputService.InputChanged, function(Input)
                         if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) and FBDragging then
                             local delta = Input.Position - FBDragStart
-                            if delta.Magnitude > 8 then FBDragMoved = true end
-                            local scale = GetFBScale()
-                            FBRoot.Position = UDim2New(
-                                FBStartPos.X.Scale,
-                                FBStartPos.X.Offset + (delta.X / scale),
-                                FBStartPos.Y.Scale,
-                                FBStartPos.Y.Offset + (delta.Y / scale)
-                            )
+                            -- drag only after clear movement
+                            if delta.Magnitude > 12 then
+                                FBDragMoved = true
+                                FBRoot.Position = UDim2New(
+                                    FBStartPos.X.Scale,
+                                    FBStartPos.X.Offset + delta.X,
+                                    FBStartPos.Y.Scale,
+                                    FBStartPos.Y.Offset + delta.Y
+                                )
+                            end
                         end
                     end)
 
@@ -3044,7 +3046,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
-                    BackgroundTransparency = 0.75,
+                    BackgroundTransparency = 0.85,
                     Position = UDim2New(0, 0, 0, 55),
                     Size = UDim2New(1, 0, 1, -55),
                     ZIndex = 2,
@@ -3545,14 +3547,15 @@ Library.NotifHolder  = Instances:Create("Frame", {
                 local SettingsItems = { }
                 do
                     SettingsItems["Settings"] = Instances:Create("Frame", {
-                        Parent = Library.UnusedHolder.Instance,
+                        Parent = Items["MainFrame"].Instance,
                         Name = "\0",
                         BorderColor3 = FromRGB(0, 0, 0),
-                        AnchorPoint = Vector2New(0.5, 0.5),
+                        AnchorPoint = Vector2New(1, 0),
                         BorderSizePixel = 0,
-                        Position = UDim2New(0.8949604630470276, 0, 0.2945185601711273, 0),
-                        Size = UDim2New(0, 245, 0, 159),
-                        ZIndex = 2,
+                        Position = UDim2New(1, -10, 0, 50),
+                        Size = UDim2New(0, 300, 0, 280),
+                        ZIndex = 50,
+                        Visible = false,
                         AutomaticSize = Enum.AutomaticSize.Y,
                         BackgroundColor3 = FromRGB(21, 21, 24)
                     }) SettingsItems["Settings"]:AddToTheme({BackgroundColor3 = "Section Background 2"})
@@ -3700,12 +3703,9 @@ Library.NotifHolder  = Instances:Create("Frame", {
                             end
     
                             SettingsItems["Settings"].Instance.Visible = true
-                            SettingsItems["Settings"].Instance.Parent = Library.Holder.Instance
-                            
-                            RenderStepped = RunService.RenderStepped:Connect(function()
-                                SettingsItems["Settings"].Instance.Position = UDim2New(0, Items["SettingsIcon"].Instance.AbsolutePosition.X, 0, Items["SettingsIcon"].Instance.AbsolutePosition.Y + Items["SettingsButton"].Instance.AbsoluteSize.Y + 108)
-                                SettingsItems["Settings"].Instance.Size = UDim2New(0, 325, 0, 230)
-                            end)
+                            SettingsItems["Settings"].Instance.Parent = Items["MainFrame"].Instance
+                            SettingsItems["Settings"].Instance.Position = UDim2New(1, -10, 0, 50)
+                            SettingsItems["Settings"].Instance.Size = UDim2New(0, 300, 0, 280)
         
                             for Index, Value in Library.OpenFrames do 
                                 if Value ~= Settings then 
@@ -3725,6 +3725,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                                 Library.OpenFrames[Settings] = nil
                             end
         
+                            -- settings stays parented to MainFrame (moves with window)
                             if RenderStepped then 
                                 RenderStepped:Disconnect()
                                 RenderStepped = nil
@@ -3760,8 +3761,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                         NewTween.Tween.Completed:Connect(function()
                             Debounce = false 
                             SettingsItems["Settings"].Instance.Visible = Settings.IsOpen
-                            task.wait(0.2)
-                            SettingsItems["Settings"].Instance.Parent = not Settings.IsOpen and Library.UnusedHolder.Instance or Library.Holder.Instance
+                            SettingsItems["Settings"].Instance.Parent = Items["MainFrame"].Instance
                         end)
                     end
     
@@ -3909,7 +3909,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     end
                 })
 
-                local BG_IMAGE_ID  = "rbxassetid://87107896404147"
+                local BG_IMAGE_ID  = "rbxthumb://type=Asset&id=105520281922171&w=420&h=420"
                 local BgImageLabel = nil
                 local BgTintLabel  = nil
 
@@ -3957,7 +3957,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     BgImageLabel.BackgroundTransparency = 1
                     BgImageLabel.ImageTransparency   = Window.SpookiBg.Transparency or 0.01
                     BgImageLabel.ScaleType           = Enum.ScaleType.Crop
-                    BgImageLabel.ZIndex              = 1
+                    BgImageLabel.ZIndex              = 0
                     BgImageLabel.BorderSizePixel     = 0
 
                     local uc = InstanceNew("UICorner")
@@ -3984,27 +3984,9 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     ApplyBgImage(true)
                 end)
 
-                Settings:Toggle({
-                    Name = "Background Image",
-                    Flag = "SpookiBgImageEnabled",
-                    Default = true,
-                    Callback = function(Value)
-                        ApplyBgImage(Value)
-                    end
-                })
-
-                Settings:Toggle({
-                    Name = "Full Hub Background",
-                    Flag = "SpookiBgFullHub",
-                    Default = true,
-                    Callback = function(Value)
-                        Window.SpookiBg.FullHub = Value
-                        if Library.Flags["SpookiBgImageEnabled"] then
-                            ApplyBgImage(true)
-                        end
-                    end
-                })
-
+                -- Background image always on (toggles removed per request)
+                Window.SpookiBg.FullHub = true
+                Library.Flags["SpookiBgImageEnabled"] = true
                 Window.SpookiApplyBg = ApplyBgImage
 
                 Settings:Button({
@@ -4207,13 +4189,12 @@ Library.NotifHolder  = Instances:Create("Frame", {
             if Items["FloatingButton"] then
                 Items["FloatingButton"]:Connect("InputEnded", function(Input)
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                        local endPos = Input.Position
-                        local mag = (endPos - FBDragStart).Magnitude
-                        local shortClick = (tick() - FBClickTimer) < 0.2
-                        if (not FBDragMoved) or mag < 15 or shortClick then
-                            if mag < 15 or shortClick then
-                                Window:SetOpen(not Window.IsOpen)
-                            end
+                        local hold = tick() - FBClickTimer
+                        local mag = (Input.Position - FBDragStart).Magnitude
+                        -- click: hold between 0.05 and 0.35s AND movement < 15px
+                        -- longer hold or bigger move = drag only
+                        if (not FBDragMoved) and mag < 15 and hold >= 0.05 and hold <= 0.35 then
+                            Window:SetOpen(not Window.IsOpen)
                         end
                     end
                 end)
@@ -4777,7 +4758,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
 
                 Name = Data.Name or Data.name or "Page",
                 Icon = Data.Icon or Data.icon or "100050851789190",
-                Columns = Data.Columns or Data.columns or 2,
+                Columns = Data.Columns or Data.columns or 1,
 
                 Items = { },
                 ColumnsData = { },
@@ -4907,7 +4888,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Instances:Create("UIListLayout", {
                         Parent = NewColumn.Instance,
                         Name = "\0",
-                        Padding = UDimNew(0, 5),
+                        Padding = UDimNew(0, 12),
                         SortOrder = Enum.SortOrder.LayoutOrder
                     })
 
@@ -5566,7 +5547,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Parent = Section.Page.ColumnsData[Section.Side].Instance,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
-                    BackgroundTransparency = 0.6499999761581421,
+                    BackgroundTransparency = 0.25,
                     ClipsDescendants = true,
                     BorderSizePixel = 0,
                     Size = UDim2New(1, 0, 0, 45),
@@ -5579,7 +5560,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Parent = Items["Section"].Instance,
                     Name = "\0",
                     BackgroundTransparency = 0.6499999761581421,
-                    Size = UDim2New(1, 0, 0, 55),
+                    Size = UDim2New(1, 0, 0, 64),
                     BorderColor3 = FromRGB(0, 0, 0),
                     ZIndex = 2,
                     BorderSizePixel = 0,
@@ -5839,8 +5820,8 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
                     BackgroundTransparency = 0.6499999761581421,
-                    Position = UDim2New(0, 1, 0, 55),
-                    Size = UDim2New(1, -2, 1, -56),
+                    Position = UDim2New(0, 1, 0, 64),
+                    Size = UDim2New(1, -2, 1, -65),
                     ZIndex = 2,
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(24, 22, 25)
@@ -5861,7 +5842,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                 Instances:Create("UIListLayout", {
                     Parent = Items["Content"].Instance,
                     Name = "\0",
-                    Padding = UDimNew(0, 5),
+                    Padding = UDimNew(0, 12),
                     SortOrder = Enum.SortOrder.LayoutOrder
                 })                
 
@@ -5973,7 +5954,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     AutoButtonColor = false,
                     BackgroundTransparency = 1,
                     BorderSizePixel = 0,
-                    Size = UDim2New(1, 0, 0, 18),
+                    Size = UDim2New(1, 0, 0, 24),
                     ZIndex = 2,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(255, 255, 255)
@@ -5982,7 +5963,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                 Items["Indicator"] = Instances:Create("Frame", {
                     Parent = Items["Toggle"].Instance,
                     Name = "\0",
-                    Size = UDim2New(0, 18, 0, 18),
+                    Size = UDim2New(0, 24, 0, 24),
                     BorderColor3 = FromRGB(0, 0, 0),
                     ZIndex = 2,
                     BorderSizePixel = 0,
@@ -6885,9 +6866,10 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Text = "",
                     AutoButtonColor = false,
                     BorderSizePixel = 0,
-                    Size = UDim2New(1, 0, 0, 32),
+                    Size = UDim2New(1, 0, 0, 40),
                     ZIndex = 2,
                     TextSize = 14,
+                    BackgroundTransparency = 0,
                     BackgroundColor3 = FromRGB(27, 26, 29)
                 })  Items["Button"]:AddToTheme({BackgroundColor3 = "Element"})
 
@@ -7037,7 +7019,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Parent = Slider.Section.Items["Content"].Instance,
                     Name = "\0",
                     BackgroundTransparency = 1,
-                    Size = UDim2New(1, 0, 0, 35),
+                    Size = UDim2New(1, 0, 0, 53),
                     BorderColor3 = FromRGB(0, 0, 0),
                     ZIndex = 2,
                     BorderSizePixel = 0,
@@ -7071,8 +7053,8 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     AutoButtonColor = false,
                     AnchorPoint = Vector2New(0, 1),
                     BorderSizePixel = 0,
-                    Position = UDim2New(0, 20, 1, -3),
-                    Size = UDim2New(1, -40, 0, 7),
+                    Position = UDim2New(0, 10, 1, -4),
+                    Size = UDim2New(1, -20, 0, 12),
                     ZIndex = 2,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(27, 26, 29)
@@ -7298,8 +7280,8 @@ Library.NotifHolder  = Instances:Create("Frame", {
                 Items = Data.Items or Data.items or { "One", "Two", "Three" },
                 Default = Data.Default or Data.default or nil,
                 Callback = Data.Callback or Data.callback or function() end,
-                Size = Data.Size or Data.size or 125,
-                OptionHolderSize = Data.OptionHolderSize or Data.optionholder or 125,
+                Size = Data.Size or Data.size or 200,
+                OptionHolderSize = Data.OptionHolderSize or Data.optionholder or 160,
                 Multi = Data.Multi or Data.multi or false,
 
                 Value = { },
@@ -7313,7 +7295,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     Parent = Dropdown.Section.Items["Content"].Instance,
                     Name = "\0",
                     BackgroundTransparency = 1,
-                    Size = UDim2New(1, 0, 0, 25),
+                    Size = UDim2New(1, 0, 0, 38),
                     BorderColor3 = FromRGB(0, 0, 0),
                     ZIndex = 2,
                     BorderSizePixel = 0,
@@ -7346,7 +7328,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
-                    Size = UDim2New(0, Dropdown.Size or 125, 0, 25),
+                    Size = UDim2New(0, math.max(Dropdown.Size or 180, 180), 0, 32),
                     AutoButtonColor = false,
                     AnchorPoint = Vector2New(1, 0),
                     Position = UDim2New(1, 0, 0, 0),
@@ -8897,7 +8879,7 @@ Library.NotifHolder  = Instances:Create("Frame", {
                     BorderColor3 = FromRGB(0, 0, 0),
                     BackgroundTransparency = 1,
                     Selectable = true,
-                    Size = UDim2New(1, 0, 0, 32),
+                    Size = UDim2New(1, 0, 0, 48),
                     ZIndex = 2,
                     BorderSizePixel = 0,
                     BackgroundColor3 = FromRGB(27, 26, 29)
