@@ -520,45 +520,46 @@ local Library do
             local Dragging = false 
             local DragStart
             local StartPosition 
+            local dragInput
         
-            local Set = function(Input)
-                local DragDelta = Input.Position - DragStart
-                local NewX = StartPosition.X.Offset + DragDelta.X
-                local NewY = StartPosition.Y.Offset + DragDelta.Y
-                self:Tween(TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                    Position = UDim2New(StartPosition.X.Scale, NewX, StartPosition.Y.Scale, NewY)
-                })
+            local function GetUIScale()
+                local scaleObj = Gui:FindFirstChildOfClass("UIScale")
+                if scaleObj then return scaleObj.Scale end
+                local parent = Gui.Parent
+                while parent do
+                    local s = parent:FindFirstChildOfClass("UIScale")
+                    if s then return s.Scale end
+                    if parent:IsA("ScreenGui") then break end
+                    parent = parent.Parent
+                end
+                return 1
             end
-        
-            local InputChanged
         
             self:Connect("InputBegan", function(Input)
                 if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                     Dragging = true
                     DragStart = Input.Position
                     StartPosition = Gui.Position
-        
-                    if InputChanged then 
-                        return
-                    end
-        
-                    InputChanged = Input.Changed:Connect(function()
+                    dragInput = Input
+                    Input.Changed:Connect(function()
                         if Input.UserInputState == Enum.UserInputState.End then
                             Dragging = false
-                            if InputChanged then
-                                InputChanged:Disconnect()
-                                InputChanged = nil
-                            end
+                            dragInput = nil
                         end
                     end)
                 end
             end)
         
             Library:Connect(UserInputService.InputChanged, function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
-                    if Dragging then
-                        Set(Input)
-                    end
+                if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) and Dragging then
+                    local scale = GetUIScale()
+                    local DragDelta = Input.Position - DragStart
+                    Gui.Position = UDim2New(
+                        StartPosition.X.Scale,
+                        StartPosition.X.Offset + (DragDelta.X / scale),
+                        StartPosition.Y.Scale,
+                        StartPosition.Y.Offset + (DragDelta.Y / scale)
+                    )
                 end
             end)
         
@@ -2697,7 +2698,7 @@ local Library do
             Data = Data or { }
 
             local Window = {
-                Name = Data.Name or Data.name or "Window",
+                Name = Data.Name or Data.name or "Spooki hub",
                 SubName = Data.SubName or Data.subname or "Fine-tuning for sure wins",
                 Logo = Data.Logo or Data.logo or "87107896404147",
                 
@@ -2761,51 +2762,56 @@ local Library do
                 local Dragging = false 
                 local DragStart
                 local StartPosition 
-    
-                local Set = function(Input)
-                    local DragDelta = Input.Position - DragStart
-                    Items["MainFrame"]:Tween(TweenInfo.new(0.16, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(StartPosition.X.Scale, StartPosition.X.Offset + DragDelta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + DragDelta.Y)})
-                end
-    
-                Items["MainFrame"]:Connect("InputBegan", function(Input)
-                    if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                        Dragging = true
-    
-                        DragStart = Input.Position
-                        StartPosition = Gui.Position
-    
-                        Input.Changed:Connect(function()
-                            if Input.UserInputState == Enum.UserInputState.End then
-                                Dragging = false
-                            end
-                        end)
-                    end
-                end)
+                local WindowDraggingBlocked = false
 
-                Items["LeftTabs"]:Connect("InputBegan", function(Input)
+                local function GetWindowScale()
+                    local scaleObj = Gui:FindFirstChildOfClass("UIScale")
+                    if scaleObj then return scaleObj.Scale end
+                    local holder = Library.Holder and Library.Holder.Instance
+                    if holder then
+                        local s = holder:FindFirstChildOfClass("UIScale")
+                        if s then return s.Scale end
+                    end
+                    return 1
+                end
+
+                local function BeginWindowDrag(Input)
+                    if WindowDraggingBlocked then return end
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
                         Dragging = true
-    
                         DragStart = Input.Position
                         StartPosition = Gui.Position
-    
                         Input.Changed:Connect(function()
                             if Input.UserInputState == Enum.UserInputState.End then
                                 Dragging = false
                             end
                         end)
                     end
-                end)
+                end
+
+                Items["MainFrame"]:Connect("InputBegan", BeginWindowDrag)
+                Items["LeftTabs"]:Connect("InputBegan", BeginWindowDrag)
     
                 Library:Connect(UserInputService.InputChanged, function(Input)
-                    if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
-                        if Dragging then
-                            Set(Input)
-                        end
+                    if WindowDraggingBlocked then
+                        Dragging = false
+                        return
+                    end
+                    if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) and Dragging then
+                        local scale = GetWindowScale()
+                        local DragDelta = Input.Position - DragStart
+                        Gui.Position = UDim2New(
+                            StartPosition.X.Scale,
+                            StartPosition.X.Offset + (DragDelta.X / scale),
+                            StartPosition.Y.Scale,
+                            StartPosition.Y.Offset + (DragDelta.Y / scale)
+                        )
                     end
                 end)
 
                 local FBDragMoved = false
+                local FBDragStart = Vector3.new()
+                local FBClickTimer = 0
                 do
 
                     Items["FloatingGlow"] = Instances:Create("Frame", {
@@ -2875,17 +2881,16 @@ local Library do
 
                     local FBRoot = Items["FloatingGlow"].Instance
                     local FBDragging = false
-                    local FBDragStart
                     local FBStartPos
+                    local FBDragInput = nil
 
-                    local FBSet = function(Input)
-                        local delta = Input.Position - FBDragStart
-                        if delta.Magnitude > 4 then FBDragMoved = true end
-                        local newPos = UDim2New(
-                            FBStartPos.X.Scale, FBStartPos.X.Offset + delta.X,
-                            FBStartPos.Y.Scale, FBStartPos.Y.Offset + delta.Y
-                        )
-                        Items["FloatingGlow"]:Tween(TweenInfo.new(0.12, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = newPos})
+                    local function GetFBScale()
+                        local holder = Library.Holder and Library.Holder.Instance
+                        if holder then
+                            local s = holder:FindFirstChildOfClass("UIScale")
+                            if s then return s.Scale end
+                        end
+                        return 1
                     end
 
                     Items["FloatingButton"]:Connect("InputBegan", function(Input)
@@ -2894,9 +2899,12 @@ local Library do
                             FBDragMoved = false
                             FBDragStart = Input.Position
                             FBStartPos = FBRoot.Position
+                            FBClickTimer = tick()
+                            FBDragInput = Input
                             Input.Changed:Connect(function()
                                 if Input.UserInputState == Enum.UserInputState.End then
                                     FBDragging = false
+                                    FBDragInput = nil
                                 end
                             end)
                         end
@@ -2904,7 +2912,15 @@ local Library do
 
                     Library:Connect(UserInputService.InputChanged, function(Input)
                         if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) and FBDragging then
-                            FBSet(Input)
+                            local delta = Input.Position - FBDragStart
+                            if delta.Magnitude > 8 then FBDragMoved = true end
+                            local scale = GetFBScale()
+                            FBRoot.Position = UDim2New(
+                                FBStartPos.X.Scale,
+                                FBStartPos.X.Offset + (delta.X / scale),
+                                FBStartPos.Y.Scale,
+                                FBStartPos.Y.Offset + (delta.Y / scale)
+                            )
                         end
                     end)
 
@@ -2978,7 +2994,7 @@ local Library do
                     FontFace = Library.Font,
                     TextColor3 = FromRGB(240, 240, 240),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Text = Window.Name,
+                    Text = Window.Name or "Spooki hub",
                     AutomaticSize = Enum.AutomaticSize.X,
                     Size = UDim2New(0, 0, 0, 15),
                     BackgroundTransparency = 1,
@@ -2988,6 +3004,25 @@ local Library do
                     TextSize = 16,
                     BackgroundColor3 = FromRGB(255, 255, 255)
                 })  Items["Title"]:AddToTheme({TextColor3 = "Text"})
+
+                -- "by slender" beside the title: 50% transparent, ~40% smaller
+                Items["Credit"] = Instances:Create("TextLabel", {
+                    Parent = Items["Title"].Instance,
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextColor3 = FromRGB(240, 240, 240),
+                    TextTransparency = 0.5,
+                    Text = "by slender",
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    Size = UDim2New(0, 0, 0, 12),
+                    BackgroundTransparency = 1,
+                    Position = UDim2New(1, 6, 0.5, 0),
+                    AnchorPoint = Vector2New(0, 0.5),
+                    BorderSizePixel = 0,
+                    ZIndex = 3,
+                    TextSize = math.floor(16 * 0.6),
+                    BackgroundColor3 = FromRGB(255, 255, 255)
+                })  Items["Credit"]:AddToTheme({TextColor3 = "Text"})
                 
                 Items["SubTitle"] = Instances:Create("TextLabel", {
                     Parent = Items["MainFrame"].Instance,
@@ -3840,28 +3875,44 @@ local Library do
                     Callback = function(Value)
                         local preset = SpookiThemePresets[Value]
                         if not preset then return end
-                        Library.Theme["Accent"]              = preset.Accent
-                        Library.Theme["AccentGradient"]      = preset.Gradient
-                        Library.Theme["Background"]          = preset.Background
-                        Library.Theme["Background 2"]        = preset.Background
-                        Library.Theme["Section Background"]  = preset.SectionBg
-                        Library.Theme["Section Background 2"]= preset.Element
-                        Library.Theme["Element"]             = preset.Element
-                        Library.Theme["Outline"]             = preset.Accent
-                        Library:ChangeTheme("Accent",              preset.Accent)
-                        Library:ChangeTheme("AccentGradient",      preset.Gradient)
-                        Library:ChangeTheme("Background",          preset.Background)
-                        Library:ChangeTheme("Background 2",        preset.Background)
-                        Library:ChangeTheme("Section Background",  preset.SectionBg)
-                        Library:ChangeTheme("Section Background 2",preset.Element)
-                        Library:ChangeTheme("Element",             preset.Element)
-                        Library:ChangeTheme("Outline",             preset.Accent)
-
+                        -- Professional full-UI theme apply (buttons, sections, outlines, backgrounds)
+                        local mapped = {
+                            Accent = preset.Accent,
+                            AccentGradient = preset.Gradient,
+                            Background = preset.Background,
+                            ["Background 2"] = preset.Background,
+                            ["Section Top"] = preset.Element,
+                            ["Section Background"] = preset.SectionBg,
+                            ["Section Background 2"] = preset.Element,
+                            Element = preset.Element,
+                            Outline = preset.Accent,
+                        }
+                        if Library.BatchUpdate then
+                            Library:BatchUpdate(function()
+                                for k, v in pairs(mapped) do
+                                    Library.Theme[k] = v
+                                    Library:ChangeTheme(k, v)
+                                end
+                            end)
+                            if Library.FlushBatchedThemes then Library:FlushBatchedThemes() end
+                        else
+                            for k, v in pairs(mapped) do
+                                Library.Theme[k] = v
+                                Library:ChangeTheme(k, v)
+                            end
+                        end
+                        for k, v in pairs(preset) do
+                            Library.Theme[k] = v
+                        end
                         if Library.SetFlags["AccentColor"] then
                             Library.SetFlags["AccentColor"](preset.Accent)
                         end
                         if Library.SetFlags["AccentGradientColor"] then
                             Library.SetFlags["AccentGradientColor"](preset.Gradient)
+                        end
+                        if Library.ThemeManager and Library.ThemeManager.SetTheme then
+                            -- keep manager state in sync without re-applying
+                            if Library.FlagDefaults then Library.FlagDefaults["SpookiThemePreset"] = Value end
                         end
                     end
                 })
@@ -4152,8 +4203,13 @@ local Library do
             if Items["FloatingButton"] then
                 Items["FloatingButton"]:Connect("InputEnded", function(Input)
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                        if not FBDragMoved then
-                            Window:SetOpen(not Window.IsOpen)
+                        local endPos = Input.Position
+                        local mag = (endPos - FBDragStart).Magnitude
+                        local shortClick = (tick() - FBClickTimer) < 0.2
+                        if (not FBDragMoved) or mag < 15 or shortClick then
+                            if mag < 15 or shortClick then
+                                Window:SetOpen(not Window.IsOpen)
+                            end
                         end
                     end
                 end)
@@ -4319,13 +4375,27 @@ local Library do
                         Parent = Intro["Holder"].Instance,
                         Name = "\0",
                         FontFace = Library.Font,
-                        Text = Window.Name,
+                        Text = Window.Name or "Spooki hub",
                         TextColor3 = FromRGB(255, 50, 50),
                         TextTransparency = 1,
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
                         Position = UDim2New(0.5, 0, 0.5, 40),
                         TextSize = 20,
+                        ZIndex = 51
+                    })
+
+                    Intro["Credit"] = Instances:Create("TextLabel", {
+                        Parent = Intro["Holder"].Instance,
+                        Name = "\0",
+                        FontFace = Library.Font,
+                        Text = "by slender",
+                        TextColor3 = FromRGB(200, 200, 200),
+                        TextTransparency = 1,
+                        BackgroundTransparency = 1,
+                        AnchorPoint = Vector2New(0.5, 0.5),
+                        Position = UDim2New(0.5, 0, 0.5, 58),
+                        TextSize = math.floor(20 * 0.6),
                         ZIndex = 51
                     })
 
@@ -4338,7 +4408,7 @@ local Library do
                         TextTransparency = 1,
                         BackgroundTransparency = 1,
                         AnchorPoint = Vector2New(0.5, 0.5),
-                        Position = UDim2New(0.5, 0, 0.5, 62),
+                        Position = UDim2New(0.5, 0, 0.5, 74),
                         TextSize = 14,
                         ZIndex = 51
                     })
@@ -4460,6 +4530,10 @@ local Library do
                         TextTransparency = 0
                     })
 
+                    Intro["Credit"]:Tween(TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        TextTransparency = 0.5
+                    })
+
                     Intro["SubTitle"]:Tween(TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                         TextTransparency = 0
                     })
@@ -4484,6 +4558,10 @@ local Library do
                     })
 
                     Intro["Title"]:Tween(TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                        TextTransparency = 1
+                    })
+
+                    Intro["Credit"]:Tween(TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
                         TextTransparency = 1
                     })
 
@@ -10186,7 +10264,7 @@ end
 
 function spookilib:CreateWindow(cfg)
     cfg = cfg or {}
-    local title    = cfg.Title or cfg.Name or "SPOOKI HUB"
+    local title    = cfg.Title or cfg.Name or "Spooki hub"
     local subtitle = cfg.Footer or cfg.SubTitle or cfg[2] or ""
     local icon     = cfg.Icon or cfg.Logo or "87107896404147"
     local font     = cfg.Font
@@ -10301,13 +10379,46 @@ do
         local preset = SpookiThemePresets[name]
         if not preset then return end
         local L = self._library or spookilib
+
+        -- Full professional theme map so every themed control (buttons, sections, outlines, etc.) updates
+        local mapped = {
+            Accent              = preset.Accent,
+            AccentGradient      = preset.Gradient,
+            Outline             = preset.Accent,
+            Background          = preset.Background,
+            ["Background 2"]    = preset.Background,
+            ["Section Top"]     = preset.Element,
+            ["Section Background"] = preset.SectionBg,
+            ["Section Background 2"] = preset.Element,
+            Element             = preset.Element,
+            Text                = Color3.fromRGB(255, 255, 255),
+        }
+
+        if L.BatchUpdate then
+            L:BatchUpdate(function()
+                for themeKey, color in pairs(mapped) do
+                    L:ChangeTheme(themeKey, color)
+                end
+            end)
+            if L.FlushBatchedThemes then
+                L:FlushBatchedThemes()
+            end
+        else
+            for themeKey, color in pairs(mapped) do
+                L:ChangeTheme(themeKey, color)
+            end
+        end
+
+        -- Keep raw preset keys available too
         for key, val in pairs(preset) do
             L.Theme[key] = val
         end
-        L:ChangeTheme("Accent", preset.Accent)
-        L:ChangeTheme("AccentGradient", preset.Gradient)
+
         if spookilib.FlagDefaults then
             spookilib.FlagDefaults["SpookiThemePreset"] = name
+        end
+        if L.Flags then
+            L.Flags["SpookiThemePreset"] = name
         end
     end
     spookilib.ThemeManager = tm
