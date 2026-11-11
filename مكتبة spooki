@@ -2734,6 +2734,76 @@ local Library do
 
                 Items["MainFrame"]:MakeResizeable(Vector2New(Items["MainFrame"].Instance.AbsoluteSize.X, Items["MainFrame"].Instance.AbsoluteSize.Y), Vector2New(9999, 9999), OriginalSizes)
                 Library:MakeBlurred(Items["MainFrame"], Window)
+
+                local resizeHandle = Instances:Create("ImageButton", {
+                    Parent = Items["MainFrame"].Instance,
+                    Name = "WindowResize",
+                    Size = UDim2New(0, 22, 0, 22),
+                    Position = UDim2New(1, -6, 1, -6),
+                    AnchorPoint = Vector2New(1, 1),
+                    BackgroundTransparency = 1,
+                    ImageTransparency = 1,
+                    Image = "",
+                    AutoButtonColor = false,
+                    ZIndex = 80,
+                    Active = true
+                })
+                local resizingWindow = false
+                local resizeStart, resizeSize
+                resizeHandle:Connect("InputBegan", function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        resizingWindow = true
+                        resizeStart = input.Position
+                        resizeSize = Items["MainFrame"].Instance.AbsoluteSize
+                    end
+                end)
+                Library:Connect(UserInputService.InputChanged, function(input)
+                    if resizingWindow and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                        local delta = input.Position - resizeStart
+                        Items["MainFrame"].Instance.Size = UDim2New(0, math.clamp(resizeSize.X + delta.X, 380, 1100), 0, math.clamp(resizeSize.Y + delta.Y, 280, 900))
+                    end
+                end)
+                Library:Connect(UserInputService.InputEnded, function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        resizingWindow = false
+                    end
+                end)
+
+                local tabResize = Instances:Create("ImageButton", {
+                    Parent = Items["MainFrame"].Instance,
+                    Name = "TabResize",
+                    Size = UDim2New(0, 18, 0, 18),
+                    Position = UDim2New(0, 220, 1, -8),
+                    AnchorPoint = Vector2New(1, 1),
+                    BackgroundTransparency = 1,
+                    ImageTransparency = 1,
+                    Image = "",
+                    AutoButtonColor = false,
+                    ZIndex = 80,
+                    Active = true
+                })
+                local resizingTabs = false
+                local tabStart, tabWidth
+                tabResize:Connect("InputBegan", function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        resizingTabs = true
+                        tabStart = input.Position
+                        tabWidth = Items["LeftTabs"].Instance.AbsoluteSize.X
+                    end
+                end)
+                Library:Connect(UserInputService.InputChanged, function(input)
+                    if resizingTabs and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                        local delta = input.Position.X - tabStart.X
+                        local width = math.clamp(tabWidth + delta, 140, 320)
+                        Items["LeftTabs"].Instance.Size = UDim2New(0, width, 1, 0)
+                        tabResize.Instance.Position = UDim2New(0, width - 4, 1, -8)
+                    end
+                end)
+                Library:Connect(UserInputService.InputEnded, function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        resizingTabs = false
+                    end
+                end)
                 
                 Items["LeftTabs"] = Instances:Create("ScrollingFrame", {
                     Parent = Items["MainFrame"].Instance,
@@ -3012,11 +3082,11 @@ local Library do
                     FontFace = Library.Font,
                     TextColor3 = FromRGB(240, 240, 240),
                     TextTransparency = 0.5,
-                    Text = "by slender",
+                    Text = "by slender and Zenix",
                     AutomaticSize = Enum.AutomaticSize.X,
                     Size = UDim2New(0, 0, 0, 12),
                     BackgroundTransparency = 1,
-                    Position = UDim2New(1, 6, 0.5, 0),
+                    Position = UDim2New(1, 10, 0.5, 1),
                     AnchorPoint = Vector2New(0, 0.5),
                     BorderSizePixel = 0,
                     ZIndex = 3,
@@ -3533,7 +3603,19 @@ local Library do
                 end)
                 
                 Items["CloseButton"]:Connect("MouseButton1Down", function()
-                    Window:SetOpen(false)
+                    pcall(function()
+                        if Items["FloatingGlow"] and Items["FloatingGlow"].Instance then
+                            Items["FloatingGlow"].Instance:Destroy()
+                        end
+                    end)
+                    pcall(function()
+                        Library.Holder.Instance:Destroy()
+                    end)
+                    pcall(function()
+                        if Library.UnusedHolder and Library.UnusedHolder.Instance then
+                            Library.UnusedHolder.Instance:Destroy()
+                        end
+                    end)
                 end)
                 
                 local Settings = {
@@ -3703,11 +3785,12 @@ local Library do
     
                             SettingsItems["Settings"].Instance.Visible = true
                             SettingsItems["Settings"].Instance.Parent = Items["MainFrame"].Instance
+                            SettingsItems["Settings"].Instance.AnchorPoint = Vector2New(1, 0)
                             
                             RenderStepped = RunService.RenderStepped:Connect(function()
-                                local icon = Items["SettingsButton"].Instance
-                                SettingsItems["Settings"].Instance.Position = UDim2New(0, icon.Position.X.Offset - 280, 0, icon.Position.Y.Offset + 36)
-                                SettingsItems["Settings"].Instance.Size = UDim2New(0, 325, 0, 230)
+                                local btn = Items["SettingsButton"].Instance
+                                SettingsItems["Settings"].Instance.Position = UDim2New(0, btn.AbsolutePosition.X - Items["MainFrame"].Instance.AbsolutePosition.X + btn.AbsoluteSize.X, 0, btn.AbsolutePosition.Y - Items["MainFrame"].Instance.AbsolutePosition.Y + btn.AbsoluteSize.Y + 6)
+                                SettingsItems["Settings"].Instance.Size = UDim2New(0, 280, 0, 240)
                             end)
         
                             for Index, Value in Library.OpenFrames do 
@@ -3844,26 +3927,35 @@ local Library do
                     end
                 })
 
-                Settings:Slider({
-                    Name = "حجم الواجهة",
-                    Default = IsMobile and 0.56 or 1,
-                    Decimals = 0.01,
-                    Max = 1.3,
-                    Min = 0.3,
-                    Suffix = "x",
-                    Flag = "UIScale",
-                    Callback = function(Value)
-                        Window:SetUIScale()
-                        Window:SetCenter()
-                    end
-                })
-
                 Settings:Keybind({
                     Name = "زر فتح القائمة",
                     Flag = "MenuBind",
                     Default = Enum.KeyCode.RightAlt,
                     Callback = function(Value)
                         Library.MenuKeybind = tostring(Value)
+                    end
+                })
+
+                Settings:Label("لون الثيم"):Colorpicker({
+                    Flag = "ThemeColor",
+                    Default = Library.Theme.Accent,
+                    Callback = function(Color)
+                        Library.Theme.Accent = Color
+                        Library.Theme.AccentGradient = Color
+                        Library.Theme.Outline = Color
+                        Library.Theme.Background = Color3.fromRGB(math.floor(Color.R * 30), math.floor(Color.G * 30), math.floor(Color.B * 30))
+                        Library.Theme["Background 2"] = Library.Theme.Background
+                        Library.Theme.Element = Color3.fromRGB(math.floor(Color.R * 40), math.floor(Color.G * 40), math.floor(Color.B * 40))
+                        Library.Theme["Section Background"] = Library.Theme.Element
+                        Library.Theme["Section Background 2"] = Library.Theme.Element
+                        Library:ChangeTheme("Accent", Color)
+                        Library:ChangeTheme("AccentGradient", Color)
+                        Library:ChangeTheme("Outline", Color)
+                        Library:ChangeTheme("Background", Library.Theme.Background)
+                        Library:ChangeTheme("Background 2", Library.Theme.Background)
+                        Library:ChangeTheme("Element", Library.Theme.Element)
+                        Library:ChangeTheme("Section Background", Library.Theme.Element)
+                        Library:ChangeTheme("Section Background 2", Library.Theme.Element)
                     end
                 })
 
@@ -4203,13 +4295,8 @@ local Library do
             if Items["FloatingButton"] then
                 Items["FloatingButton"]:Connect("InputEnded", function(Input)
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                        local endPos = Input.Position
-                        local mag = (endPos - FBDragStart).Magnitude
-                        local shortClick = (tick() - FBClickTimer) < 0.2
-                        if (not FBDragMoved) or mag < 15 or shortClick then
-                            if mag < 15 or shortClick then
-                                Window:SetOpen(not Window.IsOpen)
-                            end
+                        if not FBDragMoved then
+                            Window:SetOpen(not Window.IsOpen)
                         end
                     end
                 end)
@@ -4586,6 +4673,62 @@ local Library do
                 Window.IsOpen = false
                 Items["MainFrame"].Instance.Visible = false
             end
+            do
+                local creditsPage = Library:Page({ Name = "حقوق", Icon = "" })
+                local creditsSection = creditsPage:Section({ Name = "", Side = 1 })
+                local function headshot(username)
+                    local ok, id = pcall(function()
+                        return Players:GetUserIdFromNameAsync(username)
+                    end)
+                    if ok and id then
+                        return "rbxthumb://type=AvatarHeadShot&id=" .. tostring(id) .. "&w=150&h=150"
+                    end
+                    return ""
+                end
+                local zenixImg = headshot("Go2mohamed")
+                local slenderImg = headshot("dark_lop3")
+                local holder = InstanceNew("Frame")
+                holder.Size = UDim2New(1, 0, 0, 120)
+                holder.BackgroundTransparency = 1
+                holder.Parent = creditsSection.Items["Content"].Instance
+                local function circle(parent, image, label, x)
+                    local frame = InstanceNew("Frame")
+                    frame.Size = UDim2New(0, 72, 0, 72)
+                    frame.Position = UDim2New(x, 0, 0, 0)
+                    frame.BackgroundColor3 = FromRGB(12, 16, 28)
+                    frame.Parent = parent
+                    InstanceNew("UICorner", frame).CornerRadius = UDimNew(1, 0)
+                    local img = InstanceNew("ImageLabel")
+                    img.Size = UDim2New(1, 0, 1, 0)
+                    img.BackgroundTransparency = 1
+                    img.Image = image
+                    img.Parent = frame
+                    InstanceNew("UICorner", img).CornerRadius = UDimNew(1, 0)
+                    local text = InstanceNew("TextLabel")
+                    text.Size = UDim2New(0, 72, 0, 18)
+                    text.Position = UDim2New(x, 0, 0, 76)
+                    text.BackgroundTransparency = 1
+                    text.Text = label
+                    text.TextColor3 = FromRGB(255, 255, 255)
+                    text.TextSize = 13
+                    text.Font = Enum.Font.GothamBold
+                    text.Parent = parent
+                end
+                circle(holder, zenixImg, "Zenix", 0.18)
+                circle(holder, slenderImg, "slender", 0.62)
+                local lines = {
+                    "تم تطوير السكربت بواسطة Zenix و slender",
+                    "حقوق السكربت والواجهة للمطورين Zenix و slender",
+                    "لأخذ لقب في السكربت لازم ترسل للمطور Zenix و slender",
+                    "التيك توك للمطور zenix",
+                    "tiktok.com/@zenix_xlm",
+                    "التيك توك للمطور slender",
+                    "www.tiktok.com/@hugnamber"
+                }
+                for _, line in ipairs(lines) do
+                    creditsSection:Label(line)
+                end
+            end
             return setmetatable(Window, Library)
         end
 
@@ -4795,7 +4938,7 @@ local Library do
 
                 Name = Data.Name or Data.name or "Page",
                 Icon = Data.Icon or Data.icon or "100050851789190",
-                Columns = Data.Columns or Data.columns or 2,
+                Columns = 1,
 
                 Items = { },
                 ColumnsData = { },
@@ -4889,11 +5032,9 @@ local Library do
                 Instances:Create("UIListLayout", {
                     Parent = Items["Page"].Instance,
                     Name = "\0",
-                    FillDirection = Enum.FillDirection.Horizontal,
-                    HorizontalFlex = Enum.UIFlexAlignment.Fill,
-                    Padding = UDimNew(0, 10),
-                    SortOrder = Enum.SortOrder.LayoutOrder,
-                    VerticalFlex = Enum.UIFlexAlignment.Fill
+                    FillDirection = Enum.FillDirection.Vertical,
+                    Padding = UDimNew(0, 6),
+                    SortOrder = Enum.SortOrder.LayoutOrder
                 })
                 
                 Instances:Create("UIPadding", {
@@ -4912,10 +5053,10 @@ local Library do
                         ScrollBarImageColor3 = FromRGB(0, 0, 0),
                         Active = true,
                         AutomaticCanvasSize = Enum.AutomaticSize.Y,
-                        ScrollBarThickness = 0,
+                        ScrollBarThickness = 2,
                         BorderColor3 = FromRGB(0, 0, 0),
                         BackgroundTransparency = 1,
-                        Size = UDim2New(0, 100, 0, 100),
+                        Size = UDim2New(1, 0, 1, 0),
                         BackgroundColor3 = FromRGB(255, 255, 255),
                         ZIndex = 2,
                         BorderSizePixel = 0,
@@ -7374,7 +7515,7 @@ local Library do
                     TextColor3 = FromRGB(0, 0, 0),
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
-                    Size = UDim2New(0, Dropdown.Size or 125, 0, 25),
+                    Size = UDim2New(0, math.floor((Dropdown.Size or 125) * 1.25), 0, 25),
                     AutoButtonColor = false,
                     AnchorPoint = Vector2New(1, 0),
                     Position = UDim2New(1, 0, 0, 0),
@@ -7400,7 +7541,7 @@ local Library do
                     Size = UDim2New(1, -40, 0, 15),
                     AnchorPoint = Vector2New(0, 0.5),
                     BorderSizePixel = 0,
-                    TextTruncate = Enum.TextTruncate.AtEnd,
+                    TextTruncate = Enum.TextTruncate.None,
                     BackgroundTransparency = 1,
                     Position = UDim2New(0, 10, 0.5, -1),
                     TextXAlignment = Enum.TextXAlignment.Left,
