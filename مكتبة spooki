@@ -1,11 +1,11 @@
 -- SPOOKI HUB LIBRARY v1
 local SpookiThemePresets = {
     Spooki = {
-        Accent      = Color3.fromRGB(40, 110, 255),
-        Gradient    = Color3.fromRGB(10, 40, 120),
-        Background  = Color3.fromRGB(4, 6, 12),
-        SectionBg   = Color3.fromRGB(8, 10, 18),
-        Element     = Color3.fromRGB(12, 16, 28),
+        Accent      = Color3.fromRGB(60, 140, 255),
+        Gradient    = Color3.fromRGB(30, 80, 200),
+        Background  = Color3.fromRGB(8, 16, 32),
+        SectionBg   = Color3.fromRGB(12, 24, 48),
+        Element     = Color3.fromRGB(16, 32, 64),
     },
     Dark = {
         Accent      = Color3.fromRGB(65, 150, 255),
@@ -2810,12 +2810,13 @@ local Library do
                     Name = "\0",
                     Visible = true,
                     BorderColor3 = FromRGB(0, 0, 0),
-                    AnchorPoint = Vector2New(1, 0),
-                    BackgroundTransparency = 0.15,
-                    Size = UDim2New(0, 225, 1, 0),
-                    ZIndex = 2,
+                    AnchorPoint = Vector2New(0, 0),
+                    Position = UDim2New(0, 0, 0, 55),
+                    BackgroundTransparency = 0.25,
+                    Size = UDim2New(0, 180, 1, -55),
+                    ZIndex = 3,
                     BorderSizePixel = 0,
-                    BackgroundColor3 = FromRGB(27, 25, 29),
+                    BackgroundColor3 = FromRGB(10, 20, 40),
                     Active = true,
                     AutomaticCanvasSize = Enum.AutomaticSize.Y,
                     CanvasSize = UDim2New(0, 0, 0, 0),
@@ -2848,6 +2849,8 @@ local Library do
                 local function BeginWindowDrag(Input)
                     if WindowDraggingBlocked then return end
                     if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+                        local y = Input.Position.Y - Gui.AbsolutePosition.Y
+                        if y > 50 then return end
                         Dragging = true
                         DragStart = Input.Position
                         StartPosition = Gui.Position
@@ -3116,31 +3119,57 @@ local Library do
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
                     BorderColor3 = FromRGB(0, 0, 0),
-                    BackgroundTransparency = 0.75,
-                    Position = UDim2New(0, 0, 0, 55),
-                    Size = UDim2New(1, 0, 1, -55),
+                    BackgroundTransparency = 0.45,
+                    Position = UDim2New(0, 180, 0, 55),
+                    Size = UDim2New(1, -180, 1, -55),
                     ZIndex = 2,
                     BorderSizePixel = 0,
-                    BackgroundColor3 = FromRGB(27, 25, 29)
+                    BackgroundColor3 = FromRGB(20, 40, 80)
                 })  Items["Content"]:AddToTheme({BackgroundColor3 = "Background"})
+
+                Items["BlueLayer"] = Instances:Create("Frame", {
+                    Parent = Items["MainFrame"].Instance,
+                    Name = "BlueLayer",
+                    BorderSizePixel = 0,
+                    BackgroundTransparency = 0.55,
+                    Position = UDim2New(0, 0, 0, 0),
+                    Size = UDim2New(1, 0, 1, 0),
+                    ZIndex = 1,
+                    BackgroundColor3 = FromRGB(30, 70, 160)
+                })
+                Instances:Create("UIGradient", {
+                    Parent = Items["BlueLayer"].Instance,
+                    Name = "\0",
+                    Rotation = 90,
+                    Color = RGBSequence{
+                        RGBSequenceKeypoint(0, FromRGB(40, 90, 200)),
+                        RGBSequenceKeypoint(0.5, FromRGB(20, 50, 120)),
+                        RGBSequenceKeypoint(1, FromRGB(10, 20, 50))
+                    }
+                })
+                Instances:Create("UICorner", {
+                    Parent = Items["BlueLayer"].Instance,
+                    Name = "\0",
+                    CornerRadius = UDimNew(0, 4)
+                })
 
                 Items["CloseButton"] = Instances:Create("TextButton", {
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
                     FontFace = Library.Font,
-                    TextColor3 = FromRGB(0, 0, 0),
+                    TextColor3 = FromRGB(255, 255, 255),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "",
+                    Text = "X",
                     AutoButtonColor = false,
                     AnchorPoint = Vector2New(1, 0),
                     BorderSizePixel = 0,
-                    BackgroundTransparency = 0.20000000298023224,
-                    Position = UDim2New(1, -14, 0, 11),
-                    Size = UDim2New(0, 32, 0, 32),
-                    ZIndex = 2,
+                    BackgroundTransparency = 0.15,
+                    Position = UDim2New(1, -12, 0, 10),
+                    Size = UDim2New(0, 28, 0, 28),
+                    ZIndex = 5,
                     TextSize = 14,
-                    BackgroundColor3 = FromRGB(27, 25, 29)
-                })  Items["CloseButton"]:AddToTheme({BackgroundColor3 = "Element"})
+                    BackgroundColor3 = FromRGB(20, 40, 80)
+                })  Items["CloseButton"]:AddToTheme({BackgroundColor3 = "Element", TextColor3 = "Text"})
                 
                 Instances:Create("UICorner", {
                     Parent = Items["CloseButton"].Instance,
@@ -3422,21 +3451,21 @@ local Library do
                 Items["MinimizeButton"] = Instances:Create("TextButton", {
                     Parent = Items["MainFrame"].Instance,
                     Name = "\0",
-                    Visible = false,
+                    Visible = true,
                     FontFace = Library.Font,
-                    TextColor3 = FromRGB(0, 0, 0),
+                    TextColor3 = FromRGB(255, 255, 255),
                     BorderColor3 = FromRGB(0, 0, 0),
-                    Text = "",
+                    Text = "-",
                     AutoButtonColor = false,
                     AnchorPoint = Vector2New(1, 0),
                     BorderSizePixel = 0,
-                    BackgroundTransparency = 0.20000000298023224,
-                    Position = UDim2New(1, -56, 0, 11),
-                    Size = UDim2New(0, 32, 0, 32),
-                    ZIndex = 2,
-                    TextSize = 14,
-                    BackgroundColor3 = FromRGB(27, 25, 29)
-                })  Items["MinimizeButton"]:AddToTheme({BackgroundColor3 = "Element"})
+                    BackgroundTransparency = 0.15,
+                    Position = UDim2New(1, -46, 0, 10),
+                    Size = UDim2New(0, 28, 0, 28),
+                    ZIndex = 5,
+                    TextSize = 18,
+                    BackgroundColor3 = FromRGB(20, 40, 80)
+                })  Items["MinimizeButton"]:AddToTheme({BackgroundColor3 = "Element", TextColor3 = "Text"})
                 
                 Instances:Create("UICorner", {
                     Parent = Items["MinimizeButton"].Instance,
@@ -3632,13 +3661,14 @@ local Library do
                         Parent = Library.UnusedHolder.Instance,
                         Name = "\0",
                         BorderColor3 = FromRGB(0, 0, 0),
-                        AnchorPoint = Vector2New(0.5, 0.5),
+                        AnchorPoint = Vector2New(1, 0),
                         BorderSizePixel = 0,
-                        Position = UDim2New(0.8949604630470276, 0, 0.2945185601711273, 0),
-                        Size = UDim2New(0, 245, 0, 159),
-                        ZIndex = 2,
+                        Position = UDim2New(1, -12, 0, 48),
+                        Size = UDim2New(0, 280, 0, 240),
+                        ZIndex = 20,
                         AutomaticSize = Enum.AutomaticSize.Y,
-                        BackgroundColor3 = FromRGB(21, 21, 24)
+                        BackgroundColor3 = FromRGB(10, 20, 40),
+                        BackgroundTransparency = 0.1
                     }) SettingsItems["Settings"]:AddToTheme({BackgroundColor3 = "Section Background 2"})
                     
                     Instances:Create("UICorner", {
@@ -3786,11 +3816,15 @@ local Library do
                             SettingsItems["Settings"].Instance.Visible = true
                             SettingsItems["Settings"].Instance.Parent = Items["MainFrame"].Instance
                             SettingsItems["Settings"].Instance.AnchorPoint = Vector2New(1, 0)
+                            SettingsItems["Settings"].Instance.ZIndex = 30
                             
                             RenderStepped = RunService.RenderStepped:Connect(function()
                                 local btn = Items["SettingsButton"].Instance
-                                SettingsItems["Settings"].Instance.Position = UDim2New(0, btn.AbsolutePosition.X - Items["MainFrame"].Instance.AbsolutePosition.X + btn.AbsoluteSize.X, 0, btn.AbsolutePosition.Y - Items["MainFrame"].Instance.AbsolutePosition.Y + btn.AbsoluteSize.Y + 6)
-                                SettingsItems["Settings"].Instance.Size = UDim2New(0, 280, 0, 240)
+                                local main = Items["MainFrame"].Instance
+                                local x = btn.AbsolutePosition.X - main.AbsolutePosition.X + btn.AbsoluteSize.X
+                                local y = btn.AbsolutePosition.Y - main.AbsolutePosition.Y + btn.AbsoluteSize.Y + 4
+                                SettingsItems["Settings"].Instance.Position = UDim2New(0, x, 0, y)
+                                SettingsItems["Settings"].Instance.Size = UDim2New(0, 260, 0, 220)
                             end)
         
                             for Index, Value in Library.OpenFrames do 
@@ -4955,9 +4989,9 @@ local Library do
                     BorderColor3 = FromRGB(0, 0, 0),
                     Text = "",
                     AutoButtonColor = false,
-                    BackgroundTransparency = 1,
+                    BackgroundTransparency = 0.7,
                     BorderSizePixel = 0,
-                    Size = UDim2New(0, 200, 0, 40),
+                    Size = UDim2New(1, -8, 0, 36),
                     ZIndex = 2,
                     TextSize = 14,
                     BackgroundColor3 = FromRGB(124, 163, 255)
